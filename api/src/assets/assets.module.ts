@@ -9,11 +9,11 @@ import { AssetRealEstate } from './entities/asset-real-estate.entity';
 import { Asset } from './entities/asset.entity';
 
 @Module({
-  imports: [
-    LookupsModule,
-    TypeOrmModule.forFeature([Asset, AssetEquipment, AssetRealEstate, AssetHistory]),
-  ],
-  controllers: [AssetsController],
-  providers: [AssetsService],
+	imports: [
+		LookupsModule,
+		TypeOrmModule.forFeature([Asset, AssetEquipment, AssetRealEstate, AssetHistory]),
+	],
+	controllers: [AssetsController],
+	providers: [AssetsService],
 })
-export class AssetsModule {}
+export class AssetsModule { }

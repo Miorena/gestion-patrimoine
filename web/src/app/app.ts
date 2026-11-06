@@ -3,10 +3,10 @@ import { RouterLink, RouterOutlet } from '@angular/router';
 import { AuthService } from './core/auth.service';
 
 @Component({
-  selector: 'app-root',
-  imports: [RouterOutlet, RouterLink],
-  templateUrl: './app.html',
+	selector: 'app-root',
+	imports: [RouterOutlet, RouterLink],
+	templateUrl: './app.html',
 })
 export class App {
-  protected readonly auth = inject(AuthService);
+	protected readonly auth = inject(AuthService);
 }

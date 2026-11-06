@@ -1,5 +1,17 @@
 <a routerLink="/assets" class="back-link">
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+  <svg
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M19 12H5M12 19l-7-7 7-7" />
+  </svg>
   Retour à la liste
 </a>
 
@@ -18,7 +30,9 @@
     </div>
     <div class="header-actions">
       @if (canValidate()) {
-        <button type="button" class="btn" [disabled]="busy()" (click)="validate()">Valider l'acquisition</button>
+        <button type="button" class="btn" [disabled]="busy()" (click)="validate()">
+          Valider l'acquisition
+        </button>
       }
       @if (canEdit && !asset.state.isFinal) {
         <a [routerLink]="['/assets', asset.id, 'edit']" class="btn btn-primary">Modifier</a>
@@ -29,12 +43,32 @@
   <div class="card">
     <h2>Informations générales</h2>
     <dl class="details">
-      <div><dt>Catégorie</dt><dd>{{ asset.category.label }}</dd></div>
-      <div><dt>État</dt><dd><span class="badge" [class]="stateClass(asset.state.label)">{{ asset.state.label }}</span></dd></div>
-      <div><dt>Localisation</dt><dd>{{ asset.location.name }}</dd></div>
-      <div><dt>Date d'acquisition</dt><dd>{{ asset.acquisitionDate | date: 'dd/MM/yyyy' }}</dd></div>
-      <div><dt>Valeur d'acquisition</dt><dd>{{ asset.acquisitionValue | number: '1.2-2' }}</dd></div>
-      <div><dt>Mode d'acquisition</dt><dd>{{ modeLabel() }}</dd></div>
+      <div>
+        <dt>Catégorie</dt>
+        <dd>{{ asset.category.label }}</dd>
+      </div>
+      <div>
+        <dt>État</dt>
+        <dd>
+          <span class="badge" [class]="stateClass(asset.state.label)">{{ asset.state.label }}</span>
+        </dd>
+      </div>
+      <div>
+        <dt>Localisation</dt>
+        <dd>{{ asset.location.name }}</dd>
+      </div>
+      <div>
+        <dt>Date d'acquisition</dt>
+        <dd>{{ asset.acquisitionDate | date: 'dd/MM/yyyy' }}</dd>
+      </div>
+      <div>
+        <dt>Valeur d'acquisition</dt>
+        <dd>{{ asset.acquisitionValue | number: '1.2-2' }}</dd>
+      </div>
+      <div>
+        <dt>Mode d'acquisition</dt>
+        <dd>{{ modeLabel() }}</dd>
+      </div>
       <div>
         <dt>Acquisition validée</dt>
         <dd>{{ asset.acquisitionValidated ? 'Oui' : 'Non' }}</dd>
@@ -43,7 +77,10 @@
         <dt>Gestion</dt>
         <dd>{{ asset.managedByLot ? 'Par lot (' + asset.quantity + ' unités)' : 'Unitaire' }}</dd>
       </div>
-      <div class="wide"><dt>Observations</dt><dd>{{ asset.notes || '—' }}</dd></div>
+      <div class="wide">
+        <dt>Observations</dt>
+        <dd>{{ asset.notes || '—' }}</dd>
+      </div>
     </dl>
   </div>
 
@@ -51,9 +88,18 @@
     <div class="card">
       <h2>Équipement</h2>
       <dl class="details">
-        <div><dt>Marque</dt><dd>{{ equipment.brand || '—' }}</dd></div>
-        <div><dt>Modèle</dt><dd>{{ equipment.model || '—' }}</dd></div>
-        <div><dt>N° de série</dt><dd>{{ equipment.serialNumber || '—' }}</dd></div>
+        <div>
+          <dt>Marque</dt>
+          <dd>{{ equipment.brand || '—' }}</dd>
+        </div>
+        <div>
+          <dt>Modèle</dt>
+          <dd>{{ equipment.model || '—' }}</dd>
+        </div>
+        <div>
+          <dt>N° de série</dt>
+          <dd>{{ equipment.serialNumber || '—' }}</dd>
+        </div>
       </dl>
     </div>
   }
@@ -62,10 +108,22 @@
     <div class="card">
       <h2>Immobilier</h2>
       <dl class="details">
-        <div><dt>Nature</dt><dd>{{ kindLabel() }}</dd></div>
-        <div><dt>Adresse</dt><dd>{{ realEstate.address }}</dd></div>
-        <div><dt>Superficie</dt><dd>{{ realEstate.area | number: '1.0-2' }} m²</dd></div>
-        <div><dt>Réf. cadastrale</dt><dd>{{ realEstate.cadastralReference || '—' }}</dd></div>
+        <div>
+          <dt>Nature</dt>
+          <dd>{{ kindLabel() }}</dd>
+        </div>
+        <div>
+          <dt>Adresse</dt>
+          <dd>{{ realEstate.address }}</dd>
+        </div>
+        <div>
+          <dt>Superficie</dt>
+          <dd>{{ realEstate.area | number: '1.0-2' }} m²</dd>
+        </div>
+        <div>
+          <dt>Réf. cadastrale</dt>
+          <dd>{{ realEstate.cadastralReference || '—' }}</dd>
+        </div>
       </dl>
     </div>
   }
@@ -74,7 +132,12 @@
     <h2 class="card-title">Historique</h2>
     <table>
       <thead>
-        <tr><th>Date</th><th>Action</th><th>Détails</th><th>Utilisateur</th></tr>
+        <tr>
+          <th>Date</th>
+          <th>Action</th>
+          <th>Détails</th>
+          <th>Utilisateur</th>
+        </tr>
       </thead>
       <tbody>
         @for (entry of historyView(); track entry.id) {
@@ -88,10 +151,14 @@
                     <li>
                       <span class="change-label">{{ change.label }}</span>
                       @if (change.from !== null) {
-                        <span class="change-from" [class.is-empty]="change.fromEmpty">{{ change.from }}</span>
+                        <span class="change-from" [class.is-empty]="change.fromEmpty">{{
+                          change.from
+                        }}</span>
                         <span class="change-arrow">→</span>
                       }
-                      <span class="change-to" [class.is-empty]="change.toEmpty">{{ change.to }}</span>
+                      <span class="change-to" [class.is-empty]="change.toEmpty">{{
+                        change.to
+                      }}</span>
                     </li>
                   }
                 </ul>
@@ -102,7 +169,9 @@
             <td class="nowrap">{{ entry.userName }}</td>
           </tr>
         } @empty {
-          <tr><td colspan="4" class="empty">Aucun événement.</td></tr>
+          <tr>
+            <td colspan="4" class="empty">Aucun événement.</td>
+          </tr>
         }
       </tbody>
     </table>

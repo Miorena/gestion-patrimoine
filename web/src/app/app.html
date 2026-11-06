@@ -1,13 +1,25 @@
 @if (auth.user(); as user) {
   <header class="topbar">
     <a routerLink="/assets" class="brand">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6M9 11h.01M15 11h.01"/>
+      <svg
+        width="22"
+        height="22"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M3 21h18M5 21V8l7-5 7 5v13M9 21v-6h6v6M9 11h.01M15 11h.01" />
       </svg>
       Gestion du patrimoine
     </a>
     <div class="topbar-user">
-      <span>{{ user.name }} <span class="badge">{{ user.role }}</span></span>
+      <span
+        >{{ user.name }} <span class="badge">{{ user.role }}</span></span
+      >
       <button type="button" class="btn btn-ghost" (click)="auth.logout()">Déconnexion</button>
     </div>
   </header>

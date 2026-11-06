@@ -7,17 +7,17 @@ import { LoginDto } from './dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+	constructor(private readonly authService: AuthService) { }
 
-  @Public()
-  @Post('login')
-  @HttpCode(200)
-  login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
-  }
+	@Public()
+	@Post('login')
+	@HttpCode(200)
+	login(@Body() dto: LoginDto) {
+		return this.authService.login(dto);
+	}
 
-  @Get('me')
-  me(@CurrentUser() user: JwtPayload) {
-    return this.authService.getProfile(user.sub);
-  }
+	@Get('me')
+	me(@CurrentUser() user: JwtPayload) {
+		return this.authService.getProfile(user.sub);
+	}
 }

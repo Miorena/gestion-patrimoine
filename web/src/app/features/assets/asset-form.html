@@ -2,7 +2,9 @@
 
 <div class="page-header">
   <h1>{{ isEdit() ? 'Modifier le bien' : 'Nouveau bien' }}</h1>
-  @if (asset(); as current) { <span class="code">{{ current.code }}</span> }
+  @if (asset(); as current) {
+    <span class="code">{{ current.code }}</span>
+  }
 </div>
 
 @if (error(); as message) {
@@ -37,7 +39,10 @@
       <label for="stateId">État *</label>
       <select id="stateId" formControlName="stateId">
         @for (state of stateOptions(); track state.id) {
-          <option [ngValue]="state.id" [disabled]="state.label === inServiceLabel && inServiceLocked()">
+          <option
+            [ngValue]="state.id"
+            [disabled]="state.label === inServiceLabel && inServiceLocked()"
+          >
             {{ state.label }}
           </option>
         }
@@ -70,7 +75,13 @@
 
     <div class="field">
       <label for="acquisitionValue">Valeur d'acquisition *</label>
-      <input id="acquisitionValue" type="number" min="0" step="0.01" formControlName="acquisitionValue" />
+      <input
+        id="acquisitionValue"
+        type="number"
+        min="0"
+        step="0.01"
+        formControlName="acquisitionValue"
+      />
       @if (form.controls.acquisitionValue.touched && form.controls.acquisitionValue.invalid) {
         <small class="error">Saisissez une valeur positive ou nulle.</small>
       }
@@ -104,9 +115,18 @@
   @if (family() === 'equipement') {
     <h2>Équipement</h2>
     <div class="grid" formGroupName="equipment">
-      <div class="field"><label for="brand">Marque</label><input id="brand" formControlName="brand" maxlength="100" /></div>
-      <div class="field"><label for="model">Modèle</label><input id="model" formControlName="model" maxlength="100" /></div>
-      <div class="field"><label for="serialNumber">N° de série</label><input id="serialNumber" formControlName="serialNumber" maxlength="100" /></div>
+      <div class="field">
+        <label for="brand">Marque</label
+        ><input id="brand" formControlName="brand" maxlength="100" />
+      </div>
+      <div class="field">
+        <label for="model">Modèle</label
+        ><input id="model" formControlName="model" maxlength="100" />
+      </div>
+      <div class="field">
+        <label for="serialNumber">N° de série</label
+        ><input id="serialNumber" formControlName="serialNumber" maxlength="100" />
+      </div>
     </div>
   }
 
@@ -124,14 +144,20 @@
       <div class="field wide">
         <label for="address">Adresse *</label>
         <input id="address" formControlName="address" maxlength="255" />
-        @if (form.controls.realEstate.controls.address.touched && form.controls.realEstate.controls.address.invalid) {
+        @if (
+          form.controls.realEstate.controls.address.touched &&
+          form.controls.realEstate.controls.address.invalid
+        ) {
           <small class="error">L'adresse est obligatoire.</small>
         }
       </div>
       <div class="field">
         <label for="area">Superficie (m²) *</label>
         <input id="area" type="number" min="0.01" step="0.01" formControlName="area" />
-        @if (form.controls.realEstate.controls.area.touched && form.controls.realEstate.controls.area.invalid) {
+        @if (
+          form.controls.realEstate.controls.area.touched &&
+          form.controls.realEstate.controls.area.invalid
+        ) {
           <small class="error">Saisissez une superficie supérieure à 0.</small>
         }
       </div>

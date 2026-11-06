@@ -6,18 +6,18 @@ import { AuthService } from './auth.service';
 
 // Adds the token to API calls and logs out when it is rejected (expired token)
 export const authInterceptor: HttpInterceptorFn = (request, next) => {
-  const auth = inject(AuthService);
-  const token = auth.token;
+	const auth = inject(AuthService);
+	const token = auth.token;
 
-  const authorized =
-    token && request.url.startsWith(API_URL)
-      ? request.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
-      : request;
+	const authorized =
+		token && request.url.startsWith(API_URL)
+			? request.clone({ setHeaders: { Authorization: `Bearer ${token}` } })
+			: request;
 
-  return next(authorized).pipe(
-    catchError((error) => {
-      if (error.status === 401 && !request.url.endsWith('/auth/login')) auth.logout();
-      return throwError(() => error);
-    }),
-  );
+	return next(authorized).pipe(
+		catchError((error) => {
+			if (error.status === 401 && !request.url.endsWith('/auth/login')) auth.logout();
+			return throwError(() => error);
+		}),
+	);
 };
