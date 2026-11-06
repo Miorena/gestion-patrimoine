@@ -20,11 +20,16 @@ export class Login {
   });
   protected readonly loading = signal(false);
   protected readonly error = signal<string | null>(null);
+	protected readonly showPassword = signal(false);
 
   constructor() {
     // Already logged in: go straight to the app
     if (this.auth.isLoggedIn()) this.router.navigate(['/assets']);
   }
+
+	protected togglePassword() {
+		this.showPassword.update((visible) => !visible);
+	}
 
   protected submit() {
     if (this.form.invalid) {
