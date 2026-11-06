@@ -4,9 +4,11 @@ import { RouterLink } from '@angular/router';
 import { AssetsService } from '../../core/assets.service';
 import { AuthService } from '../../core/auth.service';
 import { errorMessage } from '../../core/http-error';
+import { toHistoryView } from '../../core/history-format';
 import {
-  ACQUISITION_MODES, Asset, HISTORY_ACTIONS, HistoryEntry, REAL_ESTATE_KINDS, ROLE,
+  ACQUISITION_MODES, Asset, HistoryEntry, Lookups, REAL_ESTATE_KINDS, ROLE,
 } from '../../core/models';
+import { stateClass } from '../../core/state-style';
 
 @Component({
   selector: 'app-asset-detail',
@@ -22,6 +24,7 @@ export class AssetDetail {
 
   protected readonly asset = signal<Asset | null>(null);
   protected readonly history = signal<HistoryEntry[]>([]);
+  protected readonly lookups = signal<Lookups | null>(null);
   protected readonly error = signal<string | null>(null);
   protected readonly busy = signal(false);
 
@@ -36,11 +39,16 @@ export class AssetDetail {
     () => REAL_ESTATE_KINDS.find((k) => k.value === this.asset()?.realEstate?.kind)?.label,
   );
 
-  protected actionLabel(action: string) {
-    return HISTORY_ACTIONS[action] ?? action;
-  }
+  // History rows with the stored JSON turned into readable "field: before → after" lines
+  protected readonly historyView = computed(() =>
+    this.history().map((entry) => toHistoryView(entry, this.lookups())),
+  );
+  protected readonly stateClass = stateClass;
 
   constructor() {
+    // Cached after the first call: needed to show category / state / location names in the history
+    this.assetsService.lookups().subscribe({ next: (lookups) => this.lookups.set(lookups) });
+
     // Reloads whenever the :id route parameter changes
     effect(() => {
       this.id();

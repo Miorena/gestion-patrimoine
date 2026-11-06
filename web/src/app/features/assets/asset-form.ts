@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, numberAttribute, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, input, numberAttribute, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -14,7 +14,7 @@ import {
   imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './asset-form.html',
 })
-export class AssetForm {
+export class AssetForm implements OnInit {
   private readonly assetsService = inject(AssetsService);
   private readonly router = inject(Router);
   private readonly fb = inject(NonNullableFormBuilder);
@@ -84,6 +84,11 @@ export class AssetForm {
       this.applyFamily(category?.family ?? null);
     });
 
+  }
+
+  // The route parameter (:id) is only available from ngOnInit, not in the constructor.
+  // The lookups are now cached and can answer immediately, so reading the id here is required.
+  ngOnInit() {
     this.assetsService.lookups().subscribe({
       next: (lookups) => {
         this.lookups.set(lookups);

@@ -26,6 +26,9 @@
 }
 
 <div class="card table-card">
+  @if (loading()) {
+    <div class="progress" role="progressbar" aria-label="Chargement"></div>
+  }
   <table>
     <thead>
       <tr>
@@ -41,15 +44,28 @@
     </thead>
     <tbody>
       @for (asset of assets(); track asset.id) {
-        <tr>
-          <td><a [routerLink]="['/assets', asset.id]" class="code">{{ asset.code }}</a></td>
+        <tr class="row-link" (click)="open(asset.id)">
+          <td><span class="code">{{ asset.code }}</span></td>
           <td>{{ asset.designation }}</td>
-          <td>{{ asset.category.label }}</td>
-          <td><span class="badge" [class.badge-final]="asset.state.isFinal">{{ asset.state.label }}</span></td>
-          <td>{{ asset.location.name }}</td>
+          <td class="nowrap">{{ asset.category.label }}</td>
+          <td><span class="badge" [class]="stateClass(asset.state.label)">{{ asset.state.label }}</span></td>
+          <td class="nowrap">{{ asset.location.name }}</td>
           <td class="num">{{ asset.quantity }}</td>
           <td class="num">{{ asset.acquisitionValue | number: '1.2-2' }}</td>
-          <td class="actions"><a [routerLink]="['/assets', asset.id]">Voir</a></td>
+          <td class="actions">
+            <a
+              class="icon-btn"
+              [routerLink]="['/assets', asset.id]"
+              (click)="$event.stopPropagation()"
+              title="Voir le détail"
+              aria-label="Voir le détail du bien {{ asset.code }}"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7S1 12 1 12z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            </a>
+          </td>
         </tr>
       } @empty {
         <tr>

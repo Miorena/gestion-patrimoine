@@ -1,5 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
+import { Observable, shareReplay } from 'rxjs';
 import { API_URL } from './api-url';
 import { Asset, AssetPayload, HistoryEntry, Lookups, Page } from './models';
 
@@ -16,8 +17,11 @@ export class AssetsService {
   private readonly http = inject(HttpClient);
   private readonly url = `${API_URL}/assets`;
 
+  // Reference data (categories, states, locations) changes rarely: fetched once, then reused
+  private lookups$?: Observable<Lookups>;
+
   lookups() {
-    return this.http.get<Lookups>(`${API_URL}/lookups`);
+    return (this.lookups$ ??= this.http.get<Lookups>(`${API_URL}/lookups`).pipe(shareReplay(1)));
   }
 
   list(filters: AssetFilters) {

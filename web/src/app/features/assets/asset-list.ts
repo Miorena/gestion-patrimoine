@@ -2,12 +2,13 @@ import { DecimalPipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { debounceTime } from 'rxjs';
 import { AssetsService } from '../../core/assets.service';
 import { AuthService } from '../../core/auth.service';
 import { errorMessage } from '../../core/http-error';
 import { Asset, Lookups, ROLE } from '../../core/models';
+import { stateClass } from '../../core/state-style';
 
 const PAGE_SIZE = 15;
 
@@ -19,6 +20,7 @@ const PAGE_SIZE = 15;
 export class AssetList {
   private readonly assetsService = inject(AssetsService);
   private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
 
   protected readonly search = new FormControl('', { nonNullable: true });
   protected readonly categoryId = new FormControl<number | null>(null);
@@ -43,6 +45,13 @@ export class AssetList {
     // Typing in the search box reloads after a short pause
     this.search.valueChanges.pipe(debounceTime(300), takeUntilDestroyed()).subscribe(() => this.applyFilters());
     this.load();
+  }
+
+  protected readonly stateClass = stateClass;
+
+  // Clicking anywhere on a row opens the asset (the eye icon does the same, for keyboard users)
+  protected open(id: number) {
+    this.router.navigate(['/assets', id]);
   }
 
   protected applyFilters() {

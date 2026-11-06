@@ -1,4 +1,7 @@
-<p><a routerLink="/assets">← Retour à la liste</a></p>
+<a routerLink="/assets" class="back-link">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
+  Retour à la liste
+</a>
 
 @if (error(); as message) {
   <div class="alert alert-error" role="alert">{{ message }}</div>
@@ -8,7 +11,10 @@
   <div class="page-header">
     <div>
       <h1>{{ asset.designation }}</h1>
-      <span class="code">{{ asset.code }}</span>
+      <div class="title-row">
+        <span class="code chip">{{ asset.code }}</span>
+        <span class="badge" [class]="stateClass(asset.state.label)">{{ asset.state.label }}</span>
+      </div>
     </div>
     <div class="header-actions">
       @if (canValidate()) {
@@ -24,7 +30,7 @@
     <h2>Informations générales</h2>
     <dl class="details">
       <div><dt>Catégorie</dt><dd>{{ asset.category.label }}</dd></div>
-      <div><dt>État</dt><dd><span class="badge" [class.badge-final]="asset.state.isFinal">{{ asset.state.label }}</span></dd></div>
+      <div><dt>État</dt><dd><span class="badge" [class]="stateClass(asset.state.label)">{{ asset.state.label }}</span></dd></div>
       <div><dt>Localisation</dt><dd>{{ asset.location.name }}</dd></div>
       <div><dt>Date d'acquisition</dt><dd>{{ asset.acquisitionDate | date: 'dd/MM/yyyy' }}</dd></div>
       <div><dt>Valeur d'acquisition</dt><dd>{{ asset.acquisitionValue | number: '1.2-2' }}</dd></div>
@@ -71,12 +77,29 @@
         <tr><th>Date</th><th>Action</th><th>Détails</th><th>Utilisateur</th></tr>
       </thead>
       <tbody>
-        @for (entry of history(); track entry.id) {
+        @for (entry of historyView(); track entry.id) {
           <tr>
-            <td>{{ entry.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
-            <td>{{ actionLabel(entry.action) }}</td>
-            <td class="details-cell">{{ entry.details }}</td>
-            <td>{{ entry.userName }}</td>
+            <td class="nowrap">{{ entry.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+            <td class="nowrap">{{ entry.actionLabel }}</td>
+            <td class="details-cell">
+              @if (entry.changes.length > 0) {
+                <ul class="changes">
+                  @for (change of entry.changes; track change.label) {
+                    <li>
+                      <span class="change-label">{{ change.label }}</span>
+                      @if (change.from !== null) {
+                        <span class="change-from" [class.is-empty]="change.fromEmpty">{{ change.from }}</span>
+                        <span class="change-arrow">→</span>
+                      }
+                      <span class="change-to" [class.is-empty]="change.toEmpty">{{ change.to }}</span>
+                    </li>
+                  }
+                </ul>
+              } @else if (entry.text) {
+                <span class="plain-text">{{ entry.text }}</span>
+              }
+            </td>
+            <td class="nowrap">{{ entry.userName }}</td>
           </tr>
         } @empty {
           <tr><td colspan="4" class="empty">Aucun événement.</td></tr>
@@ -84,4 +107,6 @@
       </tbody>
     </table>
   </div>
+} @else if (!error()) {
+  <div class="card muted">Chargement…</div>
 }
