@@ -1,0 +1,70 @@
+<div class="page-header">
+  <h1>Biens</h1>
+  @if (canCreate) {
+    <a routerLink="/assets/new" class="btn btn-primary">+ Nouveau bien</a>
+  }
+</div>
+
+<div class="card toolbar">
+  <input type="search" placeholder="Rechercher (désignation ou code)…" [formControl]="search" />
+  <select [formControl]="categoryId" (change)="applyFilters()">
+    <option [ngValue]="null">Toutes les catégories</option>
+    @for (category of lookups()?.categories; track category.id) {
+      <option [ngValue]="category.id">{{ category.label }}</option>
+    }
+  </select>
+  <select [formControl]="stateId" (change)="applyFilters()">
+    <option [ngValue]="null">Tous les états</option>
+    @for (state of lookups()?.states; track state.id) {
+      <option [ngValue]="state.id">{{ state.label }}</option>
+    }
+  </select>
+</div>
+
+@if (error(); as message) {
+  <div class="alert alert-error" role="alert">{{ message }}</div>
+}
+
+<div class="card table-card">
+  <table>
+    <thead>
+      <tr>
+        <th>Code</th>
+        <th>Désignation</th>
+        <th>Catégorie</th>
+        <th>État</th>
+        <th>Localisation</th>
+        <th class="num">Qté</th>
+        <th class="num">Valeur</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (asset of assets(); track asset.id) {
+        <tr>
+          <td><a [routerLink]="['/assets', asset.id]" class="code">{{ asset.code }}</a></td>
+          <td>{{ asset.designation }}</td>
+          <td>{{ asset.category.label }}</td>
+          <td><span class="badge" [class.badge-final]="asset.state.isFinal">{{ asset.state.label }}</span></td>
+          <td>{{ asset.location.name }}</td>
+          <td class="num">{{ asset.quantity }}</td>
+          <td class="num">{{ asset.acquisitionValue | number: '1.2-2' }}</td>
+          <td class="actions"><a [routerLink]="['/assets', asset.id]">Voir</a></td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="8" class="empty">{{ loading() ? 'Chargement…' : 'Aucun bien trouvé.' }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+<div class="pagination">
+  <span class="muted">{{ total() }} bien(s)</span>
+  <div>
+    <button type="button" class="btn" [disabled]="page() <= 1" (click)="goTo(page() - 1)">Précédent</button>
+    <span>Page {{ page() }} / {{ pageCount() }}</span>
+    <button type="button" class="btn" [disabled]="page() >= pageCount()" (click)="goTo(page() + 1)">Suivant</button>
+  </div>
+</div>

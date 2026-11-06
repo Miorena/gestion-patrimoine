@@ -1,0 +1,12 @@
+@if (auth.user(); as user) {
+  <header class="topbar">
+    <a routerLink="/assets" class="brand">Gestion du patrimoine</a>
+    <div class="topbar-user">
+      <span>{{ user.name }} <span class="badge">{{ user.role }}</span></span>
+      <button type="button" class="btn btn-ghost" (click)="auth.logout()">Déconnexion</button>
+    </div>
+  </header>
+}
+<main class="container">
+  <router-outlet />
+</main>
