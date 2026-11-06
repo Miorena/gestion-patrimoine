@@ -4,6 +4,7 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterLink } from '@angular/router';
 import { AssetsService } from '../../core/assets.service';
 import { errorMessage } from '../../core/http-error';
+import { ToastService } from '../../core/toast.service';
 import {
 	ACQUISITION_MODES, AcquisitionMode, Asset, AssetFamily, AssetPayload, IN_SERVICE_LABEL,
 	Lookups, REAL_ESTATE_KINDS, RealEstateKind,
@@ -17,6 +18,7 @@ import {
 export class AssetForm implements OnInit {
 	private readonly assetsService = inject(AssetsService);
 	private readonly router = inject(Router);
+	private readonly toast = inject(ToastService);
 	private readonly fb = inject(NonNullableFormBuilder);
 
 	// Route parameter :id (absent on /assets/new → creation mode)
@@ -113,7 +115,14 @@ export class AssetForm implements OnInit {
 		const request = id !== undefined ? this.assetsService.update(id, payload) : this.assetsService.create(payload);
 
 		request.subscribe({
-			next: (asset) => this.router.navigate(['/assets', asset.id]),
+			next: (asset) => {
+				this.toast.success(
+					id !== undefined
+						? `Bien « ${asset.designation} » modifié avec succès.`
+						: `Bien « ${asset.designation} » ajouté (${asset.code}).`,
+				);
+				this.router.navigate(['/assets', asset.id]);
+			},
 			error: (error) => {
 				this.error.set(errorMessage(error));
 				this.saving.set(false);

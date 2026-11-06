@@ -5,6 +5,7 @@ import { AssetsService } from '../../core/assets.service';
 import { AuthService } from '../../core/auth.service';
 import { errorMessage } from '../../core/http-error';
 import { toHistoryView } from '../../core/history-format';
+import { ToastService } from '../../core/toast.service';
 import {
 	ACQUISITION_MODES, Asset, HistoryEntry, Lookups, REAL_ESTATE_KINDS, ROLE,
 } from '../../core/models';
@@ -18,6 +19,7 @@ import { stateClass } from '../../core/state-style';
 export class AssetDetail {
 	private readonly assetsService = inject(AssetsService);
 	private readonly auth = inject(AuthService);
+	private readonly toast = inject(ToastService);
 
 	// Route parameter :id (bound through withComponentInputBinding)
 	readonly id = input.required({ transform: numberAttribute });
@@ -63,6 +65,7 @@ export class AssetDetail {
 				this.asset.set(asset);
 				this.error.set(null);
 				this.busy.set(false);
+				this.toast.success('Acquisition validée.');
 				this.loadHistory();
 			},
 			error: (error) => {

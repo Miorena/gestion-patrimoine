@@ -20,10 +20,45 @@
       <span
         >{{ user.name }} <span class="badge">{{ user.role }}</span></span
       >
-      <button type="button" class="btn btn-ghost" (click)="auth.logout()">Déconnexion</button>
+      <button type="button" class="btn btn-ghost" (click)="askLogout()">Déconnexion</button>
     </div>
   </header>
+
+  <dialog
+    #logoutDialog
+    class="modal"
+    aria-labelledby="logout-title"
+    (click)="onDialogClick($event)"
+  >
+    <div class="modal-body">
+      <h2 id="logout-title">Se déconnecter ?</h2>
+      <p class="muted">
+        Vous devrez saisir à nouveau votre adresse e-mail et votre mot de passe pour revenir.
+      </p>
+      <div class="modal-actions">
+        <button type="button" class="btn" (click)="cancelLogout()">Annuler</button>
+        <button type="button" class="btn btn-primary" (click)="confirmLogout()">
+          Se déconnecter
+        </button>
+      </div>
+    </div>
+  </dialog>
 }
 <main class="container">
   <router-outlet />
 </main>
+<div class="toast-container" aria-live="polite">
+  @for (item of toast.toasts(); track item.id) {
+    <div class="toast" [class]="'toast toast-' + item.kind" role="status">
+      <span class="toast-message">{{ item.message }}</span>
+      <button
+        type="button"
+        class="toast-close"
+        (click)="toast.dismiss(item.id)"
+        aria-label="Fermer la notification"
+      >
+        ×
+      </button>
+    </div>
+  }
+</div>
