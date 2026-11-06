@@ -1,6 +1,6 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { DataSource, EntityManager, Repository } from 'typeorm';
+import { DataSource, EntityManager, Repository, SelectQueryBuilder } from 'typeorm';
 import { AssetFamily, Category, Location, State } from '../lookups/lookup.entities';
 import { CreateAssetDto, EquipmentDto, RealEstateDto } from './dto/create-asset.dto';
 import { ListAssetsQueryDto } from './dto/list-assets-query.dto';
@@ -28,47 +28,69 @@ export class AssetsService {
   ) {}
 
   // ---------- Reads ----------
+  // Each read costs as few database round trips as possible: the database is remote,
+  // so every sequential query adds the full network latency to the response time.
 
   async findAll(query: ListAssetsQueryDto) {
     const { page, limit, search, categoryId, stateId } = query;
 
-    const qb = this.assetsRepository
-      .createQueryBuilder('asset')
-      .leftJoinAndSelect('asset.category', 'category')
-      .leftJoinAndSelect('asset.state', 'state')
-      .leftJoinAndSelect('asset.location', 'location')
-      .orderBy('asset.id', 'DESC')
-      .skip((page - 1) * limit)
-      .take(limit);
+    // Same filters for the page of items and for the total count
+    const applyFilters = (qb: SelectQueryBuilder<Asset>) => {
+      if (search?.trim()) {
+        // Escape LIKE wildcards typed by the user
+        const term = `%${search.trim().replace(/[\\%_]/g, '\\$&')}%`;
+        qb.andWhere('(asset.designation ILIKE :term OR asset.code ILIKE :term)', { term });
+      }
+      if (categoryId) qb.andWhere('asset.categoryId = :categoryId', { categoryId });
+      if (stateId) qb.andWhere('asset.stateId = :stateId', { stateId });
+      return qb;
+    };
 
-    if (search?.trim()) {
-      // Escape LIKE wildcards typed by the user
-      const term = `%${search.trim().replace(/[\\%_]/g, '\\$&')}%`;
-      qb.andWhere('(asset.designation ILIKE :term OR asset.code ILIKE :term)', { term });
-    }
-    if (categoryId) qb.andWhere('asset.categoryId = :categoryId', { categoryId });
-    if (stateId) qb.andWhere('asset.stateId = :stateId', { stateId });
+    // offset/limit (not skip/take): the joins are all many-to-one, so rows are never duplicated
+    // and TypeORM does not need its extra "select the ids first" query.
+    const itemsQuery = applyFilters(
+      this.assetsRepository
+        .createQueryBuilder('asset')
+        .leftJoinAndSelect('asset.category', 'category')
+        .leftJoinAndSelect('asset.state', 'state')
+        .leftJoinAndSelect('asset.location', 'location')
+        .orderBy('asset.id', 'DESC')
+        .offset((page - 1) * limit)
+        .limit(limit),
+    );
+    const countQuery = applyFilters(this.assetsRepository.createQueryBuilder('asset'));
 
-    const [items, total] = await qb.getManyAndCount();
+    // The two queries run in parallel: one round trip instead of three in a row
+    const [items, total] = await Promise.all([itemsQuery.getMany(), countQuery.getCount()]);
     return { items, total, page, limit };
   }
 
   async findOne(id: number) {
-    const asset = await this.assetsRepository.findOne({
-      where: { id },
-      relations: { category: true, state: true, location: true, equipment: true, realEstate: true },
-    });
+    // A single query with all the joins (findOne + relations would split it in two)
+    const asset = await this.assetsRepository
+      .createQueryBuilder('asset')
+      .leftJoinAndSelect('asset.category', 'category')
+      .leftJoinAndSelect('asset.state', 'state')
+      .leftJoinAndSelect('asset.location', 'location')
+      .leftJoinAndSelect('asset.equipment', 'equipment')
+      .leftJoinAndSelect('asset.realEstate', 'realEstate')
+      .where('asset.id = :id', { id })
+      .getOne();
     if (!asset) throw new NotFoundException(`Asset ${id} not found`);
     return asset;
   }
 
   async findHistory(id: number) {
-    await this.findOne(id); // 404 if the asset does not exist
-    const rows = await this.historyRepository.find({
-      where: { assetId: id },
-      relations: { user: true },
-      order: { createdAt: 'DESC', id: 'DESC' },
-    });
+    // The existence check (404) and the history are fetched at the same time
+    const [exists, rows] = await Promise.all([
+      this.assetsRepository.existsBy({ id }),
+      this.historyRepository.find({
+        where: { assetId: id },
+        relations: { user: true },
+        order: { createdAt: 'DESC', id: 'DESC' },
+      }),
+    ]);
+    if (!exists) throw new NotFoundException(`Asset ${id} not found`);
     return rows.map((row) => ({
       id: row.id,
       createdAt: row.createdAt,
@@ -178,8 +200,9 @@ export class AssetsService {
       // TODO (affectations): refuse a quantity lower than the quantity already assigned
 
       await manager.save(asset);
-      await this.saveExtension(manager, id, currentCategory.family, dto.equipment, dto.realEstate);
-      if (dto.equipment || dto.realEstate) changes['extension'] = [null, 'updated'];
+      // Only recorded in the history when the equipment / real estate details really changed
+      const extensionChanged = await this.saveExtension(manager, id, currentCategory.family, dto.equipment, dto.realEstate);
+      if (extensionChanged) changes['extension'] = [null, 'updated'];
 
       if (Object.keys(changes).length > 0) {
         await this.addHistory(manager, id, userId, 'ASSET_UPDATED', JSON.stringify(changes));
@@ -238,34 +261,53 @@ export class AssetsService {
     }
   }
 
-  // Insert or update the extension row matching the family
+  // Insert or update the extension row matching the family.
+  // Returns true when an existing row was modified (so the history only logs real changes).
   private async saveExtension(
     manager: EntityManager,
     assetId: number,
     family: AssetFamily,
     equipment?: EquipmentDto,
     realEstate?: RealEstateDto,
-  ) {
+  ): Promise<boolean> {
     if (family === AssetFamily.EQUIPMENT) {
       // The equipment row always exists; a provided object replaces all its fields
-      const exists = await manager.existsBy(AssetEquipment, { assetId });
-      if (!exists || equipment) {
-        await manager.save(AssetEquipment, {
-          assetId,
-          brand: equipment?.brand ?? null,
-          model: equipment?.model ?? null,
-          serialNumber: equipment?.serialNumber ?? null,
-        });
+      const current = await manager.findOneBy(AssetEquipment, { assetId });
+      const next = {
+        brand: equipment?.brand ?? null,
+        model: equipment?.model ?? null,
+        serialNumber: equipment?.serialNumber ?? null,
+      };
+      if (!current) {
+        await manager.save(AssetEquipment, { assetId, ...next });
+        return false; // creation, not a modification
       }
-    } else if (realEstate) {
-      await manager.save(AssetRealEstate, {
-        assetId,
-        address: realEstate.address,
-        area: realEstate.area,
-        cadastralReference: realEstate.cadastralReference ?? null,
-        kind: realEstate.kind,
-      });
+      if (!equipment) return false;
+      const changed =
+        current.brand !== next.brand || current.model !== next.model || current.serialNumber !== next.serialNumber;
+      if (changed) await manager.save(AssetEquipment, { assetId, ...next });
+      return changed;
     }
+
+    if (!realEstate) return false;
+    const current = await manager.findOneBy(AssetRealEstate, { assetId });
+    const next = {
+      address: realEstate.address,
+      area: realEstate.area,
+      cadastralReference: realEstate.cadastralReference ?? null,
+      kind: realEstate.kind,
+    };
+    if (!current) {
+      await manager.save(AssetRealEstate, { assetId, ...next });
+      return false;
+    }
+    const changed =
+      current.address !== next.address ||
+      Number(current.area) !== Number(next.area) ||
+      current.cadastralReference !== next.cadastralReference ||
+      current.kind !== next.kind;
+    if (changed) await manager.save(AssetRealEstate, { assetId, ...next });
+    return changed;
   }
 
   private addHistory(manager: EntityManager, assetId: number, userId: number, action: string, details: string | null) {
