@@ -14,7 +14,7 @@ import { AssetPanel, PanelMode } from './asset-panel';
 // Hauteur d'une ligne de la liste (56 px) et espace entre deux lignes (2 px) : voir .asset-item dans styles.css
 const ROW_HEIGHT = 56;
 const ROW_GAP = 2;
-const MIN_ROWS = 4;
+const MIN_ROWS = 3;
 
 @Component({
 	selector: 'app-asset-list',

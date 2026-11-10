@@ -116,6 +116,8 @@ h2 {
   margin: 0 auto;
   padding: 1.25rem 1.5rem;
   overflow: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 /* L'application occupe exactement la fenêtre : la barre du haut + le contenu qui prend le reste, sans défilement de la page */
@@ -130,6 +132,13 @@ app-root {
 }
 .topbar {
   flex: none;
+}
+
+app-asset-list {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 /* ---------- Cards ---------- */
@@ -817,16 +826,17 @@ input[type='password']::-ms-reveal {
    ====================================================================== */
 .workspace {
   display: grid;
-  grid-template-columns: minmax(340px, 430px) minmax(0, 1fr);
-  gap: 1.25rem;
-  height: 100%; /* toute la place restante sous la barre du haut */
+  grid-template-columns: clamp(300px, 28vw, 430px) minmax(0, 1fr);
   grid-template-rows: minmax(0, 1fr);
-  height: 100%; /* toute la place restante sous la barre du haut */
+  gap: 1.25rem;
+  flex: 1;
+  min-height: 0; /* toute la place restante sous la barre du haut */
 }
 .list-panel,
 .panel {
   display: flex;
   flex-direction: column;
+  height: 100%;
   min-height: 0;
   overflow: hidden;
   background: var(--surface);
@@ -1123,6 +1133,32 @@ input[type='password']::-ms-reveal {
 .span-6 {
   grid-column: span 6;
 }
+/* Panneau large : les sections se répartissent sur deux colonnes */
+@container panel (min-width: 820px) {
+  .sections {
+    column-count: 2;
+    column-gap: 2.5rem;
+  }
+  .section {
+    break-inside: avoid;
+    padding-bottom: 1.2rem;
+  }
+  .section + .section {
+    margin-top: 0;
+  }
+  .form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .span-2,
+  .span-3 {
+    grid-column: span 1;
+  }
+  .span-4,
+  .span-6 {
+    grid-column: span 2;
+  }
+}
+/* Panneau étroit : une colonne, grille de 2 champs */
 @container panel (max-width: 700px) {
   .form-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1250,6 +1286,11 @@ input[type='password']::-ms-reveal {
 @media (max-width: 1000px) {
   .workspace {
     grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    flex: none;
+  }
+  .list-panel,
+  .panel {
     height: auto;
   }
   .list-panel {
@@ -1260,5 +1301,67 @@ input[type='password']::-ms-reveal {
   }
   .panel-body {
     overflow: visible;
+  }
+}
+/* ---------- Fenêtres peu hautes : affichage plus dense pour tout faire tenir ---------- */
+@media (max-height: 820px) {
+  .container {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+  .topbar {
+    padding-top: 0.45rem;
+    padding-bottom: 0.45rem;
+  }
+  .list-head {
+    padding: 0.75rem 1rem 0.6rem;
+  }
+  .list-filters {
+    padding: 0 1rem 0.65rem;
+  }
+  .panel-header {
+    padding: 0.7rem 1.25rem;
+  }
+  .panel-title h2 {
+    font-size: 1.2rem;
+  }
+  .panel-title .title-row {
+    margin-top: 0.25rem;
+  }
+  .tab {
+    padding: 0.5rem 0.8rem;
+  }
+  .panel-body {
+    padding: 0.8rem 1.25rem 0.6rem;
+  }
+  .section-title {
+    margin-bottom: 0.55rem;
+  }
+  .form-grid {
+    gap: 0.6rem 1rem;
+  }
+  .field {
+    gap: 0.15rem;
+  }
+  .field label {
+    font-size: 0.76rem;
+  }
+  .panel input,
+  .panel select,
+  .panel textarea {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.88rem;
+  }
+  .value,
+  .check-row {
+    min-height: 2.1rem;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.88rem;
+  }
+  .value.multiline {
+    min-height: 2.6rem;
+  }
+  .section {
+    padding-bottom: 0.8rem;
   }
 }
