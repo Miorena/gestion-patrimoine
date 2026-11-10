@@ -1,0 +1,475 @@
+<section class="panel">
+  <!-- ===== En-tête : titre, pastilles et actions ===== -->
+  <header class="panel-header">
+    @if (mode() === 'create') {
+      <div class="panel-title">
+        <h2>Nouveau bien</h2>
+        <p class="subtitle">Renseignez les informations du bien à ajouter.</p>
+      </div>
+    } @else if (asset(); as a) {
+      <div class="panel-title">
+        <h2 [title]="a.designation">{{ a.designation }}</h2>
+        <div class="title-row">
+          <span class="code chip">{{ a.code }}</span>
+          <span class="badge" [class]="stateClass(a.state.label)">{{ a.state.label }}</span>
+          <span class="badge" [class]="a.acquisitionValidated ? 'st-service' : 'st-maintenance'">
+            {{ a.acquisitionValidated ? 'Acquisition validée' : 'Acquisition à valider' }}
+          </span>
+        </div>
+      </div>
+    } @else {
+      <div class="panel-title"><h2 class="placeholder-title">Détail du bien</h2></div>
+    }
+
+    <div class="panel-actions">
+      @if (editing()) {
+        <button type="button" class="btn" [disabled]="saving()" (click)="cancelled.emit()">
+          Annuler
+        </button>
+        <button type="submit" form="asset-form" class="btn btn-primary" [disabled]="saving()">
+          {{ saving() ? 'Enregistrement…' : 'Enregistrer' }}
+        </button>
+      } @else if (asset(); as a) {
+        @if (canValidate()) {
+          <button type="button" class="btn" [disabled]="busy()" (click)="validate()">
+            Valider l'acquisition
+          </button>
+        }
+        @if (canEdit && !a.state.isFinal) {
+          <button type="button" class="btn btn-primary" (click)="editRequested.emit()">
+            Modifier
+          </button>
+        }
+      }
+    </div>
+  </header>
+
+  <!-- ===== Onglets (en lecture seulement) ===== -->
+  @if (!editing() && asset()) {
+    <nav class="tabs" role="tablist">
+      <button
+        type="button"
+        role="tab"
+        class="tab"
+        [class.active]="tab() === 'info'"
+        [attr.aria-selected]="tab() === 'info'"
+        (click)="tab.set('info')"
+      >
+        Informations
+      </button>
+      <button
+        type="button"
+        role="tab"
+        class="tab"
+        [class.active]="tab() === 'history'"
+        [attr.aria-selected]="tab() === 'history'"
+        (click)="tab.set('history')"
+      >
+        Historique <span class="tab-count">{{ history().length }}</span>
+      </button>
+    </nav>
+  }
+
+  <!-- ===== Corps ===== -->
+  <div class="panel-body">
+    @if (error(); as message) {
+      <div class="alert alert-error" role="alert">{{ message }}</div>
+    }
+
+    @if (editing() || asset()) {
+      @if (editing() || tab() === 'info') {
+        <form id="asset-form" class="sections" [formGroup]="form" (ngSubmit)="save()">
+          @let a = asset();
+
+          <!-- Identification -->
+          <section class="section">
+            <h3 class="section-title">Identification</h3>
+            <div class="form-grid">
+              <div class="field span-4">
+                <label for="designation"
+                  >Désignation
+                  @if (editing()) {
+                    <span class="req">*</span>
+                  }
+                </label>
+                @if (editing()) {
+                  <input id="designation" formControlName="designation" maxlength="200" />
+                  @if (form.controls.designation.touched && form.controls.designation.invalid) {
+                    <small class="error">La désignation est obligatoire.</small>
+                  }
+                } @else {
+                  <div class="value strong">{{ a?.designation }}</div>
+                }
+              </div>
+
+              <div class="field span-2">
+                <label for="categoryId"
+                  >Catégorie
+                  @if (editing()) {
+                    <span class="req">*</span>
+                  }
+                </label>
+                @if (editing()) {
+                  <select id="categoryId" formControlName="categoryId">
+                    <option [ngValue]="null" disabled>Choisir…</option>
+                    @for (category of categoryOptions(); track category.id) {
+                      <option [ngValue]="category.id">{{ category.label }}</option>
+                    }
+                  </select>
+                  @if (form.controls.categoryId.touched && form.controls.categoryId.invalid) {
+                    <small class="error">Choisissez une catégorie.</small>
+                  }
+                } @else {
+                  <div class="value">{{ a?.category?.label }}</div>
+                }
+              </div>
+
+              <div class="field span-2">
+                <label for="stateId"
+                  >État
+                  @if (editing()) {
+                    <span class="req">*</span>
+                  }
+                </label>
+                @if (editing()) {
+                  <select id="stateId" formControlName="stateId">
+                    @for (state of stateOptions(); track state.id) {
+                      <option
+                        [ngValue]="state.id"
+                        [disabled]="state.label === inServiceLabel && inServiceLocked()"
+                      >
+                        {{ state.label }}
+                      </option>
+                    }
+                  </select>
+                  @if (inServiceLocked()) {
+                    <small class="muted"
+                      >« En service » est possible après validation de l'acquisition.</small
+                    >
+                  }
+                } @else {
+                  <div class="value">
+                    @if (a) {
+                      <span class="badge" [class]="stateClass(a.state.label)">{{
+                        a.state.label
+                      }}</span>
+                    }
+                  </div>
+                }
+              </div>
+
+              <div class="field span-4">
+                <label for="locationId"
+                  >Localisation
+                  @if (editing()) {
+                    <span class="req">*</span>
+                  }
+                </label>
+                @if (editing()) {
+                  <select id="locationId" formControlName="locationId">
+                    <option [ngValue]="null" disabled>Choisir…</option>
+                    @for (location of lookups()?.locations; track location.id) {
+                      <option [ngValue]="location.id">{{ location.name }}</option>
+                    }
+                  </select>
+                  @if (form.controls.locationId.touched && form.controls.locationId.invalid) {
+                    <small class="error">Choisissez une localisation.</small>
+                  }
+                } @else {
+                  <div class="value">{{ a?.location?.name }}</div>
+                }
+              </div>
+
+              @if (displayFamily() !== 'immobilier') {
+                <div class="field span-3">
+                  <label for="managedByLot">Gestion</label>
+                  @if (editing()) {
+                    <label class="check-row" for="managedByLot">
+                      <input id="managedByLot" type="checkbox" formControlName="managedByLot" />
+                      Bien géré par lot
+                    </label>
+                  } @else {
+                    <div class="value">{{ a?.managedByLot ? 'Par lot' : 'Unitaire' }}</div>
+                  }
+                </div>
+
+                <div class="field span-3">
+                  <label for="quantity">Quantité</label>
+                  @if (editing()) {
+                    <input
+                      id="quantity"
+                      type="number"
+                      min="1"
+                      step="1"
+                      formControlName="quantity"
+                    />
+                  } @else {
+                    <div class="value">{{ a?.quantity }}</div>
+                  }
+                </div>
+              }
+            </div>
+          </section>
+
+          <!-- Acquisition -->
+          <section class="section">
+            <h3 class="section-title">Acquisition</h3>
+            <div class="form-grid">
+              <div class="field span-2">
+                <label for="acquisitionDate"
+                  >Date d'acquisition
+                  @if (editing()) {
+                    <span class="req">*</span>
+                  }
+                </label>
+                @if (editing()) {
+                  <input
+                    id="acquisitionDate"
+                    type="date"
+                    formControlName="acquisitionDate"
+                    [max]="today"
+                  />
+                  @if (
+                    form.controls.acquisitionDate.touched && form.controls.acquisitionDate.invalid
+                  ) {
+                    <small class="error">La date est obligatoire.</small>
+                  }
+                } @else {
+                  <div class="value">{{ a?.acquisitionDate | date: 'dd/MM/yyyy' }}</div>
+                }
+              </div>
+
+              <div class="field span-2">
+                <label for="acquisitionValue"
+                  >Valeur d'acquisition
+                  @if (editing()) {
+                    <span class="req">*</span>
+                  }
+                </label>
+                @if (editing()) {
+                  <input
+                    id="acquisitionValue"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    formControlName="acquisitionValue"
+                  />
+                  @if (
+                    form.controls.acquisitionValue.touched && form.controls.acquisitionValue.invalid
+                  ) {
+                    <small class="error">Saisissez une valeur positive ou nulle.</small>
+                  }
+                } @else {
+                  <div class="value">{{ a?.acquisitionValue | number: '1.2-2' }}</div>
+                }
+              </div>
+
+              <div class="field span-2">
+                <label for="acquisitionMode">Mode d'acquisition</label>
+                @if (editing()) {
+                  <select id="acquisitionMode" formControlName="acquisitionMode">
+                    @for (mode of acquisitionModes; track mode.value) {
+                      <option [value]="mode.value">{{ mode.label }}</option>
+                    }
+                  </select>
+                } @else {
+                  <div class="value">{{ modeLabel() }}</div>
+                }
+              </div>
+            </div>
+          </section>
+
+          <!-- Équipement (affiché selon la catégorie) -->
+          @if (displayFamily() === 'equipement') {
+            <section class="section">
+              <h3 class="section-title">Équipement</h3>
+              <div class="form-grid" formGroupName="equipment">
+                <div class="field span-2">
+                  <label for="brand">Marque</label>
+                  @if (editing()) {
+                    <input id="brand" formControlName="brand" maxlength="100" />
+                  } @else {
+                    <div class="value">{{ a?.equipment?.brand || '—' }}</div>
+                  }
+                </div>
+                <div class="field span-2">
+                  <label for="model">Modèle</label>
+                  @if (editing()) {
+                    <input id="model" formControlName="model" maxlength="100" />
+                  } @else {
+                    <div class="value">{{ a?.equipment?.model || '—' }}</div>
+                  }
+                </div>
+                <div class="field span-2">
+                  <label for="serialNumber">N° de série</label>
+                  @if (editing()) {
+                    <input id="serialNumber" formControlName="serialNumber" maxlength="100" />
+                  } @else {
+                    <div class="value">{{ a?.equipment?.serialNumber || '—' }}</div>
+                  }
+                </div>
+              </div>
+            </section>
+          }
+
+          <!-- Immobilier (affiché selon la catégorie) -->
+          @if (displayFamily() === 'immobilier') {
+            <section class="section">
+              <h3 class="section-title">Immobilier</h3>
+              <div class="form-grid" formGroupName="realEstate">
+                <div class="field span-2">
+                  <label for="kind"
+                    >Nature
+                    @if (editing()) {
+                      <span class="req">*</span>
+                    }
+                  </label>
+                  @if (editing()) {
+                    <select id="kind" formControlName="kind">
+                      @for (kind of realEstateKinds; track kind.value) {
+                        <option [value]="kind.value">{{ kind.label }}</option>
+                      }
+                    </select>
+                  } @else {
+                    <div class="value">{{ kindLabel() }}</div>
+                  }
+                </div>
+                <div class="field span-2">
+                  <label for="area"
+                    >Superficie (m²)
+                    @if (editing()) {
+                      <span class="req">*</span>
+                    }
+                  </label>
+                  @if (editing()) {
+                    <input id="area" type="number" min="0.01" step="0.01" formControlName="area" />
+                    @if (
+                      form.controls.realEstate.controls.area.touched &&
+                      form.controls.realEstate.controls.area.invalid
+                    ) {
+                      <small class="error">Saisissez une superficie supérieure à 0.</small>
+                    }
+                  } @else {
+                    <div class="value">{{ a?.realEstate?.area | number: '1.0-2' }} m²</div>
+                  }
+                </div>
+                <div class="field span-2">
+                  <label for="cadastralReference">Réf. cadastrale</label>
+                  @if (editing()) {
+                    <input
+                      id="cadastralReference"
+                      formControlName="cadastralReference"
+                      maxlength="100"
+                    />
+                  } @else {
+                    <div class="value">{{ a?.realEstate?.cadastralReference || '—' }}</div>
+                  }
+                </div>
+                <div class="field span-6">
+                  <label for="address"
+                    >Adresse
+                    @if (editing()) {
+                      <span class="req">*</span>
+                    }
+                  </label>
+                  @if (editing()) {
+                    <input id="address" formControlName="address" maxlength="255" />
+                    @if (
+                      form.controls.realEstate.controls.address.touched &&
+                      form.controls.realEstate.controls.address.invalid
+                    ) {
+                      <small class="error">L'adresse est obligatoire.</small>
+                    }
+                  } @else {
+                    <div class="value">{{ a?.realEstate?.address }}</div>
+                  }
+                </div>
+              </div>
+            </section>
+          }
+
+          <!-- Observations -->
+          <section class="section">
+            <h3 class="section-title">Observations</h3>
+            <div class="form-grid">
+              <div class="field span-6">
+                @if (editing()) {
+                  <textarea
+                    id="notes"
+                    rows="3"
+                    formControlName="notes"
+                    aria-label="Observations"
+                  ></textarea>
+                } @else {
+                  <div class="value multiline">{{ a?.notes || '—' }}</div>
+                }
+              </div>
+            </div>
+          </section>
+        </form>
+      } @else {
+        <!-- ===== Historique en frise chronologique ===== -->
+        <ol class="timeline">
+          @for (entry of historyView(); track entry.id) {
+            <li class="timeline-item">
+              <span class="timeline-dot" [class]="dotClass(entry.action)"></span>
+              <div class="timeline-card">
+                <div class="timeline-head">
+                  <strong>{{ entry.actionLabel }}</strong>
+                  <span class="timeline-meta"
+                    >{{ entry.createdAt | date: 'dd/MM/yyyy HH:mm' }} · {{ entry.userName }}</span
+                  >
+                </div>
+                @if (entry.changes.length > 0) {
+                  <ul class="changes">
+                    @for (change of entry.changes; track change.label) {
+                      <li>
+                        <span class="change-label">{{ change.label }}</span>
+                        @if (change.from !== null) {
+                          <span class="change-from" [class.is-empty]="change.fromEmpty">{{
+                            change.from
+                          }}</span>
+                          <span class="change-arrow">→</span>
+                        }
+                        <span class="change-to" [class.is-empty]="change.toEmpty">{{
+                          change.to
+                        }}</span>
+                      </li>
+                    }
+                  </ul>
+                } @else if (entry.text) {
+                  <span class="plain-text">{{ entry.text }}</span>
+                }
+              </div>
+            </li>
+          } @empty {
+            <li class="empty">Aucun événement.</li>
+          }
+        </ol>
+      }
+    } @else if (loading()) {
+      <div class="panel-empty">
+        <div class="spinner" role="status" aria-label="Chargement"></div>
+        <p>Chargement du bien…</p>
+      </div>
+    } @else {
+      <div class="panel-empty">
+        <svg
+          width="44"
+          height="44"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.4"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M21 8l-9-5-9 5v8l9 5 9-5V8z" />
+          <path d="M3 8l9 5 9-5M12 13v8" />
+        </svg>
+        <p>Sélectionnez un bien dans la liste<br />pour afficher son détail.</p>
+      </div>
+    }
+  </div>
+</section>

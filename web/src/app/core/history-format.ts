@@ -11,6 +11,7 @@ export interface HistoryChange {
 export interface HistoryView {
 	id: number;
 	createdAt: string;
+	action: string;
 	actionLabel: string;
 	userName: string;
 	changes: HistoryChange[]; // readable list of modified fields
@@ -89,6 +90,7 @@ export function toHistoryView(entry: HistoryEntry, lookups: Lookups | null): His
 	return {
 		id: entry.id,
 		createdAt: entry.createdAt,
+		action: entry.action,
 		actionLabel: HISTORY_ACTIONS[entry.action] ?? entry.action,
 		userName: entry.userName,
 		changes,
