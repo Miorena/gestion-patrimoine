@@ -3,8 +3,8 @@ import {
 	IsBoolean, IsEnum, IsISO8601, IsInt, IsNotEmpty, IsNumber, IsOptional,
 	IsPositive, IsString, MaxLength, Min, ValidateNested,
 } from 'class-validator';
-import { AcquisitionMode } from '../entities/asset.entity';
-import { RealEstateKind } from '../entities/asset-real-estate.entity';
+import { AcquisitionMode } from '../enums/acquisition-mode.enum';
+import { RealEstateKind } from '../enums/real-estate-kind.enum';
 
 export class EquipmentDto {
 	@IsOptional() @IsString() @MaxLength(100)

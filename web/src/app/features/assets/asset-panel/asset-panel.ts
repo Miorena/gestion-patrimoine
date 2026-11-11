@@ -2,16 +2,17 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AssetsService } from '../../core/assets.service';
-import { AuthService } from '../../core/auth.service';
-import { errorMessage } from '../../core/http-error';
-import { toHistoryView } from '../../core/history-format';
-import {
-	ACQUISITION_MODES, AcquisitionMode, Asset, AssetFamily, AssetPayload, HistoryEntry, IN_SERVICE_LABEL,
-	Lookups, REAL_ESTATE_KINDS, RealEstateKind, ROLE,
-} from '../../core/models';
-import { stateClass } from '../../core/state-style';
-import { ToastService } from '../../core/toast.service';
+import { AssetsService } from '../assets.service';
+import { AuthService } from '../../../core/auth/auth.service';
+import { errorMessage } from '../../../core/http/http-error';
+import { toHistoryView } from '../utils/history-format';
+import { ACQUISITION_MODES, IN_SERVICE_LABEL, REAL_ESTATE_KINDS } from '../asset.constants';
+import { AcquisitionMode, Asset, AssetPayload, RealEstateKind } from '../models/asset.model';
+import { AssetFamily, Lookups } from '../models/lookup.model';
+import { HistoryEntry } from '../models/history.model';
+import { ROLE } from '../../../core/auth/auth.models';
+import { stateClass } from '../utils/state-style';
+import { ToastService } from '../../../core/toast/toast.service';
 
 export type PanelMode = 'view' | 'edit' | 'create';
 

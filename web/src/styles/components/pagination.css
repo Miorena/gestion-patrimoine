@@ -1,0 +1,14 @@
+/* ---------- Pagination ---------- */
+.pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+}
+.pagination > div {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}

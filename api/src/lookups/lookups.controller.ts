@@ -1,7 +1,9 @@
 import { Controller, Get } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Category, Location, State } from './lookup.entities';
+import { Category } from './entities/category.entity';
+import { Location } from './entities/location.entity';
+import { State } from './entities/state.entity';
 
 // Read-only reference data needed by the asset form (full CRUD comes later)
 @Controller('lookups')

@@ -1,0 +1,39 @@
+/* ---------- State badges ---------- */
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  white-space: nowrap;
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+.st-stock {
+  background: #e6eefb;
+  color: #25508f;
+}
+.st-service {
+  background: #e1f4e8;
+  color: #17653a;
+}
+.st-maintenance {
+  background: #fdf0d3;
+  color: #8a5800;
+}
+.st-cede {
+  background: #ece8fb;
+  color: #4f35a1;
+}
+.st-reforme {
+  background: #eceff3;
+  color: #4b5565;
+}
+.st-perdu {
+  background: #fde7e4;
+  color: #a3281d;
+}
+.st-default {
+  background: #eef1f5;
+  color: #475467;
+}

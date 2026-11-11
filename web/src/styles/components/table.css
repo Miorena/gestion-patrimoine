@@ -1,0 +1,65 @@
+/* ---------- Tables ---------- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+th,
+td {
+  padding: 0.8rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+th {
+  font-size: 0.72rem;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+  background: var(--surface-alt);
+  white-space: nowrap;
+}
+tbody tr:last-child td {
+  border-bottom: 0;
+}
+tbody tr.row-link {
+  cursor: pointer;
+  transition: background 0.12s;
+}
+tbody tr.row-link:hover {
+  background: var(--surface-alt);
+}
+.nowrap {
+  white-space: nowrap;
+}
+.num {
+  text-align: right;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.actions {
+  text-align: right;
+  width: 1%;
+  white-space: nowrap;
+  padding-right: 0.75rem;
+}
+.empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 2rem;
+}
+
+.code {
+  font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 0.84rem;
+  color: #344054;
+  white-space: nowrap;
+  letter-spacing: 0.01em;
+}
+span.code.chip {
+  background: var(--primary-soft);
+  color: var(--primary);
+  padding: 0.15rem 0.55rem;
+  border-radius: 6px;
+}

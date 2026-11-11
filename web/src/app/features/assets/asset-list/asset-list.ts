@@ -3,13 +3,15 @@ import { Component, DestroyRef, ElementRef, afterNextRender, computed, inject, s
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { debounceTime, merge } from 'rxjs';
-import { AssetsService } from '../../core/assets.service';
-import { AuthService } from '../../core/auth.service';
-import { errorMessage } from '../../core/http-error';
-import { Asset, Lookups, ROLE } from '../../core/models';
-import { stateClass } from '../../core/state-style';
-import { ToastService } from '../../core/toast.service';
-import { AssetPanel, PanelMode } from './asset-panel';
+import { AssetsService } from '../assets.service';
+import { AuthService } from '../../../core/auth/auth.service';
+import { errorMessage } from '../../../core/http/http-error';
+import { Asset } from '../models/asset.model';
+import { Lookups } from '../models/lookup.model';
+import { ROLE } from '../../../core/auth/auth.models';
+import { stateClass } from '../utils/state-style';
+import { ToastService } from '../../../core/toast/toast.service';
+import { AssetPanel, PanelMode } from '../asset-panel/asset-panel';
 
 // Hauteur d'une ligne de la liste (56 px) et espace entre deux lignes (2 px) : voir .asset-item dans styles.css
 const ROW_HEIGHT = 56;

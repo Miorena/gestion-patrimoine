@@ -1,16 +1,11 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { numericTransformer } from '../../common/transformers/numeric.transformer';
-import { Category, Location, State } from '../../lookups/lookup.entities';
+import { Category } from '../../lookups/entities/category.entity';
+import { Location } from '../../lookups/entities/location.entity';
+import { State } from '../../lookups/entities/state.entity';
 import { AssetEquipment } from './asset-equipment.entity';
 import { AssetRealEstate } from './asset-real-estate.entity';
-
-// Values match the CHECK constraint on bien.mode_acquisition
-export enum AcquisitionMode {
-	PURCHASE = 'achat',
-	DONATION = 'don_legs',
-	INTERNAL_TRANSFER = 'transfert_inter_service',
-	INTERNAL_PRODUCTION = 'fabrication_interne',
-}
+import { AcquisitionMode } from '../enums/acquisition-mode.enum';
 
 @Entity('bien')
 export class Asset {

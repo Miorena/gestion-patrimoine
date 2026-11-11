@@ -1,0 +1,42 @@
+/* ---------- Cards ---------- */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.4rem;
+  margin-bottom: 1.1rem;
+}
+.table-card {
+  padding: 0;
+  overflow-x: auto;
+  position: relative;
+}
+.card-title {
+  padding: 1.1rem 1.4rem 0;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.page-header .code {
+  margin-top: 0.35rem;
+}
+.page-header {
+  align-items: center;
+}
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-top: 0.45rem;
+}

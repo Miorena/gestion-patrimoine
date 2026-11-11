@@ -1,0 +1,65 @@
+/* ---------- Detail ---------- */
+.details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.1rem 1.5rem;
+  margin: 0;
+}
+.details dt {
+  font-size: 0.72rem;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+.details dd {
+  margin: 0.2rem 0 0;
+}
+.details .wide {
+  grid-column: 1 / -1;
+}
+
+/* ---------- History ---------- */
+.details-cell {
+  font-size: 0.86rem;
+}
+.changes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.3rem;
+}
+.changes li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem;
+}
+.change-label {
+  font-weight: 600;
+  color: #344054;
+}
+.change-label::after {
+  content: ' :';
+}
+.change-from {
+  color: var(--muted);
+  text-decoration: line-through;
+  text-decoration-color: #c3cad6;
+}
+.change-arrow {
+  color: var(--muted);
+}
+.change-from.is-empty,
+.change-to.is-empty {
+  font-style: italic;
+  color: var(--muted);
+  text-decoration: none;
+}
+.change-to {
+  color: var(--text);
+}
+.plain-text {
+  color: var(--muted);
+}

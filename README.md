@@ -67,25 +67,71 @@ nginx relaie vers l'API : il n'y a donc pas de CORS à gérer et l'application f
 
 ```
 gestion-patrimoine/
-├── api/                      API NestJS
+├── api/                          API NestJS
 │   ├── src/
-│   │   ├── auth/             connexion, JWT, rôles
-│   │   ├── assets/           biens : contrôleur, service, entités, DTO
-│   │   ├── lookups/          catégories, états, localisations
-│   │   ├── users/
-│   │   ├── common/           gardes, décorateurs, énumérations
-│   │   └── database/         migration, script SQL v2, seed
+│   │   ├── main.ts · app.module.ts
+│   │   ├── auth/                 connexion et JWT
+│   │   │   ├── decorators/       @Public, @Roles, @CurrentUser
+│   │   │   ├── guards/           garde JWT (globale) et garde des rôles
+│   │   │   └── dto/ · types/     corps du login, contenu du jeton
+│   │   ├── users/                utilisateurs et rôles (entities/, enums/)
+│   │   ├── lookups/              catégories, états, localisations (entities/, enums/)
+│   │   ├── assets/               biens
+│   │   │   ├── assets.controller · assets.service · assets.module
+│   │   │   ├── asset.rules.ts    règles de gestion (fonctions pures)
+│   │   │   └── dto/ · entities/ · enums/
+│   │   ├── common/               code transversal (transformer des NUMERIC)
+│   │   └── database/             migration, script SQL v2, seed
 │   └── Dockerfile
-├── web/                      Interface Angular
-│   ├── src/app/
-│   │   ├── core/             services, intercepteur, modèles, toasts
-│   │   └── features/         login, assets (liste + panneau de détail)
-│   ├── nginx.conf
+├── web/                          Interface Angular
+│   ├── src/
+│   │   ├── styles.css            ne contient que des @import
+│   │   ├── styles/               base, layout, components/, features/
+│   │   └── app/
+│   │       ├── core/             ce que toute l'application utilise
+│   │       │   ├── auth/         service, intercepteur, garde de route, rôles
+│   │       │   ├── http/         URL de l'API, messages d'erreur
+│   │       │   └── toast/        notifications
+│   │       ├── shared/           éléments génériques sans logique métier (pagination)
+│   │       └── features/
+│   │           ├── login/
+│   │           └── assets/       service, models/, utils/, constantes,
+│   │                             asset-list/ et asset-panel/ (liste + panneau de détail)
+│   ├── nginx.conf · proxy.conf.json
 │   └── Dockerfile
-├── docs/carnet_de_bord.md    décisions techniques et leurs raisons
+├── docs/carnet_de_bord.md        décisions techniques et leurs raisons
 ├── docker-compose.yml
 └── README.md
 ```
+
+### Organisation du code
+
+**API : un dossier par fonctionnalité.** Chaque dossier (`auth`, `users`, `lookups`, `assets`) regroupe son module,
+son contrôleur, son service et, selon le besoin, `dto/` (ce que le client a le droit d'envoyer), `entities/` (les tables) et `enums/`.
+
+| Où ?              | Quoi                                                                                              |
+| ----------------- | ------------------------------------------------------------------------------------------------- |
+| `*.controller.ts` | Déclare les routes et appelle le service. Aucune règle métier.                                    |
+| `*.service.ts`    | Logique métier et accès à la base (transactions comprises).                                       |
+| `*.rules.ts`      | Règles de gestion pures (pas d'accès à la base) : faciles à lire et à tester.                     |
+| `auth/`           | Tout ce qui concerne l'identité : jeton, gardes, décorateurs `@Public`, `@Roles`, `@CurrentUser`. |
+| `common/`         | Seulement ce qui n'appartient à aucune fonctionnalité.                                            |
+| `database/`       | Migration, script SQL, seed : utilisés aussi par Docker, ne pas déplacer.                         |
+
+Ajouter une fonctionnalité (par exemple les affectations) : créer `src/assignments/` sur le modèle de `assets/`,
+puis l'ajouter aux `imports` de `app.module.ts`.
+
+**Web : `core`, `shared`, `features`.**
+
+| Dossier          | Contenu                                                                    | Peut importer            |
+| ---------------- | -------------------------------------------------------------------------- | ------------------------ |
+| `core/`          | Services utilisés partout (connexion, appels HTTP, notifications)          | rien du reste de l'appli |
+| `shared/`        | Types ou composants génériques réutilisables                               | rien du reste de l'appli |
+| `features/<nom>` | Tout ce qui ne sert qu'à une fonctionnalité : service, modèles, composants | `core/` et `shared/`     |
+
+Un composant a son propre dossier, avec son `.ts` et son `.html` côte à côte (`asset-list/`, `asset-panel/`).
+Les styles globaux sont découpés dans `src/styles/` (`components/` pour les éléments réutilisables, `features/` pour un écran) et
+assemblés par `styles.css`.
 
 ---
 
@@ -273,6 +319,8 @@ et l'API refuse de toute façon les actions non permises (erreur 403).
 | Code         | Généré par la base à la création, jamais modifiable.                                                                                                                                                |
 | Transaction  | Création et modification (bien + détails + historique) se font en une seule transaction : en cas d'erreur, rien n'est enregistré et aucun numéro de code n'est perdu.                               |
 
+Ces règles sont codées dans `api/src/assets/asset.rules.ts` (fonctions pures) et appliquées par `assets.service.ts`. Le code d'inventaire, la quantité affectée et l'historique en ajout seul sont garantis par la base (triggers de `schema_v2.sql`).
+
 L'historique enregistre la **création**, chaque **modification** (champ par champ, avant → après)
 et la **validation de l'acquisition**. Les détails d'équipement ou d'immobilier ne sont consignés que s'ils ont réellement changé.
 
@@ -319,6 +367,7 @@ Les décisions importantes et leurs raisons sont dans `docs/carnet_de_bord.md`. 
 | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `Configuration key "DATABASE_URL" does not exist`                                  | Le fichier `api/.env` manque (il n'est pas dans Git). `cp .env.example .env` puis le remplir.                                                                                                                                                    |
 | `Cannot find module '.../dist/main'`                                               | Le fichier `api/tsconfig.build.tsbuildinfo` persiste alors que `dist/` a été vidé. Le supprimer, ou vérifier que `tsBuildInfoFile` pointe dans `dist/` (voir `api/tsconfig.json`).                                                               |
+| `failed to read dockerfile: open Dockerfile: no such file or directory`            | Sous Linux, le nom doit être exactement `Dockerfile` (majuscule). Renommer : `git mv api/dockerfile api/Dockerfile` et `git mv web/dockerfile web/Dockerfile`. Windows ne fait pas la différence, Linux oui.                                     |
 | `address already in use` sur le port 5432                                          | Un PostgreSQL local occupe déjà ce port. La base Docker utilise le port **5433** pour cette raison.                                                                                                                                              |
 | `npm ci` échoue avec `ENOTFOUND registry.npmjs.org` pendant `docker compose build` | Certains réseaux (partage de connexion, pare-feu) ne laissent pas les conteneurs résoudre les noms. Essayer `network: host` dans la section `build` du service, ou une image `node:24-slim` au lieu de `node:24-alpine`.                         |
 | `volume patrimoine-pg18 declared as external, but could not be found`              | Créer le volume : `docker volume create patrimoine-pg18`.                                                                                                                                                                                        |

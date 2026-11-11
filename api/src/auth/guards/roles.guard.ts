@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators/roles.decorator';
-import { RoleName } from '../enums/role.enum';
+import { RoleName } from '../../users/enums/role-name.enum';
 
 // Global guard: checks the @Roles() restriction (runs after JwtAuthGuard)
 @Injectable()

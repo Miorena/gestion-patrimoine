@@ -1,7 +1,10 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, EntityManager, Repository, SelectQueryBuilder } from 'typeorm';
-import { AssetFamily, Category, Location, State } from '../lookups/lookup.entities';
+import { AssetFamily } from '../lookups/enums/asset-family.enum';
+import { Category } from '../lookups/entities/category.entity';
+import { Location } from '../lookups/entities/location.entity';
+import { State } from '../lookups/entities/state.entity';
 import { CreateAssetDto, EquipmentDto, RealEstateDto } from './dto/create-asset.dto';
 import { ListAssetsQueryDto } from './dto/list-assets-query.dto';
 import { UpdateAssetDto } from './dto/update-asset.dto';
@@ -9,15 +12,7 @@ import { AssetEquipment } from './entities/asset-equipment.entity';
 import { AssetHistory } from './entities/asset-history.entity';
 import { AssetRealEstate } from './entities/asset-real-estate.entity';
 import { Asset } from './entities/asset.entity';
-
-// Label of the "in service" state (RG04: only allowed once the acquisition is validated)
-const IN_SERVICE_LABEL = 'En service';
-
-// Fields compared to build the history of an update
-const TRACKED_FIELDS = [
-	'designation', 'acquisitionDate', 'acquisitionValue', 'acquisitionMode',
-	'managedByLot', 'quantity', 'notes', 'categoryId', 'stateId', 'locationId',
-] as const;
+import { assertDateNotInFuture, assertExtensionMatchesFamily, assertLotConsistency, IN_SERVICE_LABEL, TRACKED_FIELDS } from './asset.rules';
 
 @Injectable()
 export class AssetsService {
@@ -103,13 +98,13 @@ export class AssetsService {
 	// ---------- Writes ----------
 
 	async create(dto: CreateAssetDto, userId: number) {
-		this.assertDateNotInFuture(dto.acquisitionDate);
+		assertDateNotInFuture(dto.acquisitionDate);
 
 		const id = await this.dataSource.transaction(async (manager) => {
 			const category = await this.getCategory(manager, dto.categoryId);
 			const state = await this.getState(manager, dto.stateId);
 			await this.assertLocationExists(manager, dto.locationId);
-			this.assertExtensionMatchesFamily(category.family, dto.equipment, dto.realEstate, true);
+			assertExtensionMatchesFamily(category.family, dto.equipment, dto.realEstate, true);
 
 			// New assets are not validated yet, and cannot start in a final state
 			if (state.isFinal) {
@@ -121,7 +116,7 @@ export class AssetsService {
 
 			const managedByLot = dto.managedByLot ?? false;
 			const quantity = dto.quantity ?? 1;
-			this.assertLotConsistency(category.family, managedByLot, quantity);
+			assertLotConsistency(category.family, managedByLot, quantity);
 
 			const asset = await manager.save(
 				manager.create(Asset, {
@@ -150,7 +145,7 @@ export class AssetsService {
 	}
 
 	async update(id: number, dto: UpdateAssetDto, userId: number) {
-		if (dto.acquisitionDate) this.assertDateNotInFuture(dto.acquisitionDate);
+		if (dto.acquisitionDate) assertDateNotInFuture(dto.acquisitionDate);
 
 		await this.dataSource.transaction(async (manager) => {
 			// Lock the row so two concurrent updates cannot overlap
@@ -185,7 +180,7 @@ export class AssetsService {
 			if (dto.locationId && dto.locationId !== asset.locationId) {
 				await this.assertLocationExists(manager, dto.locationId);
 			}
-			this.assertExtensionMatchesFamily(currentCategory.family, dto.equipment, dto.realEstate, false);
+			assertExtensionMatchesFamily(currentCategory.family, dto.equipment, dto.realEstate, false);
 
 			// Apply the changes and record which fields changed
 			const changes: Record<string, [unknown, unknown]> = {};
@@ -196,7 +191,7 @@ export class AssetsService {
 					(asset as any)[field] = newValue;
 				}
 			}
-			this.assertLotConsistency(currentCategory.family, asset.managedByLot, asset.quantity);
+			assertLotConsistency(currentCategory.family, asset.managedByLot, asset.quantity);
 			// TODO (affectations): refuse a quantity lower than the quantity already assigned
 
 			await manager.save(asset);
@@ -227,39 +222,6 @@ export class AssetsService {
 	}
 
 	// ---------- Helpers ----------
-
-	private assertDateNotInFuture(date: string) {
-		const today = new Date().toISOString().slice(0, 10);
-		if (date > today) throw new BadRequestException('The acquisition date cannot be in the future');
-	}
-
-	// A standalone asset has quantity 1; real estate is never managed by lot
-	private assertLotConsistency(family: AssetFamily, managedByLot: boolean, quantity: number) {
-		if (family === AssetFamily.REAL_ESTATE && managedByLot) {
-			throw new BadRequestException('Real estate cannot be managed by lot');
-		}
-		if (!managedByLot && quantity !== 1) {
-			throw new BadRequestException('An asset not managed by lot must have a quantity of 1');
-		}
-	}
-
-	// Extension must match category.family (equipment XOR real estate)
-	private assertExtensionMatchesFamily(
-		family: AssetFamily,
-		equipment: EquipmentDto | undefined,
-		realEstate: RealEstateDto | undefined,
-		isCreation: boolean,
-	) {
-		if (family === AssetFamily.EQUIPMENT && realEstate) {
-			throw new BadRequestException('Real estate details are not allowed for an equipment category');
-		}
-		if (family === AssetFamily.REAL_ESTATE && equipment) {
-			throw new BadRequestException('Equipment details are not allowed for a real estate category');
-		}
-		if (family === AssetFamily.REAL_ESTATE && isCreation && !realEstate) {
-			throw new BadRequestException('Real estate details are required for this category');
-		}
-	}
 
 	// Insert or update the extension row matching the family.
 	// Returns true when an existing row was modified (so the history only logs real changes).

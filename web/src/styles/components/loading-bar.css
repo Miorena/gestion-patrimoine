@@ -1,0 +1,27 @@
+/* ---------- Loading bar ---------- */
+.progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  overflow: hidden;
+  background: transparent;
+}
+.progress::after {
+  content: '';
+  display: block;
+  height: 100%;
+  width: 35%;
+  background: var(--focus);
+  border-radius: 3px;
+  animation: slide 1s ease-in-out infinite;
+}
+@keyframes slide {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(300%);
+  }
+}

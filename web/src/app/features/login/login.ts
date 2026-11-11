@@ -1,9 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { AuthService } from '../../core/auth.service';
-import { errorMessage } from '../../core/http-error';
-import { ToastService } from '../../core/toast.service';
+import { AuthService } from '../../core/auth/auth.service';
+import { errorMessage } from '../../core/http/http-error';
+import { ToastService } from '../../core/toast/toast.service';
 
 @Component({
 	selector: 'app-login',

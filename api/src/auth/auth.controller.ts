@@ -1,7 +1,7 @@
 import { Body, Controller, Get, HttpCode, Post } from '@nestjs/common';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import type { JwtPayload } from '../common/decorators/current-user.decorator';
-import { Public } from '../common/decorators/public.decorator';
+import { CurrentUser } from './decorators/current-user.decorator';
+import type { JwtPayload } from './types/jwt-payload.interface';
+import { Public } from './decorators/public.decorator';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 

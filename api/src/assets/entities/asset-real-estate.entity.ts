@@ -1,12 +1,7 @@
 import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn } from 'typeorm';
 import { numericTransformer } from '../../common/transformers/numeric.transformer';
 import { Asset } from './asset.entity';
-
-// Values match the CHECK constraint on bien_immobilier.nature
-export enum RealEstateKind {
-	BUILDING = 'batiment',
-	LAND = 'terrain',
-}
+import { RealEstateKind } from '../enums/real-estate-kind.enum';
 
 @Entity('bien_immobilier')
 export class AssetRealEstate {

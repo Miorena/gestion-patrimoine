@@ -1,4 +1,6 @@
-import { ACQUISITION_MODES, HISTORY_ACTIONS, HistoryEntry, Lookups } from './models';
+import { ACQUISITION_MODES, HISTORY_ACTIONS } from '../asset.constants';
+import { HistoryEntry } from '../models/history.model';
+import { Lookups } from '../models/lookup.model';
 
 export interface HistoryChange {
 	label: string;

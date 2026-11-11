@@ -7,7 +7,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
-import { JwtPayload } from '../decorators/current-user.decorator';
+import { JwtPayload } from '../types/jwt-payload.interface';
 
 // Global guard: every route requires a valid token unless marked @Public()
 @Injectable()

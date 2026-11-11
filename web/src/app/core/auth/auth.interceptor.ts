@@ -1,7 +1,7 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { catchError, throwError } from 'rxjs';
-import { API_URL } from './api-url';
+import { API_URL } from '../http/api-url';
 import { AuthService } from './auth.service';
 
 // Adds the token to API calls and logs out when it is rejected (expired token)

@@ -1,8 +1,8 @@
 import { Body, Controller, Get, HttpCode, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import type { JwtPayload } from '../common/decorators/current-user.decorator';
-import { Roles } from '../common/decorators/roles.decorator';
-import { RoleName } from '../common/enums/role.enum';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import type { JwtPayload } from '../auth/types/jwt-payload.interface';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { RoleName } from '../users/enums/role-name.enum';
 import { AssetsService } from './assets.service';
 import { CreateAssetDto } from './dto/create-asset.dto';
 import { ListAssetsQueryDto } from './dto/list-assets-query.dto';

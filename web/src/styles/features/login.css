@@ -1,0 +1,54 @@
+/* ---------- Login ---------- */
+.login-wrapper {
+  min-height: calc(100dvh - 2.5rem);
+  display: grid;
+  place-items: center;
+}
+.login-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 2rem;
+}
+.login-card h1 {
+  margin-bottom: 0.25rem;
+}
+.login-card p {
+  margin: 0 0 1.5rem;
+}
+/* Password field with a show / hide button */
+.password-wrap {
+  position: relative;
+}
+.password-wrap input {
+  padding-right: 2.9rem;
+}
+.toggle-password {
+  position: absolute;
+  top: 50%;
+  right: 0.35rem;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+.toggle-password:hover {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+.toggle-password:focus-visible {
+  outline: 2px solid var(--focus);
+}
+/* Edge adds its own "reveal" icon: hidden to avoid a duplicate */
+input[type='password']::-ms-reveal {
+  display: none;
+}

@@ -1,0 +1,68 @@
+/* ---------- Toasts ---------- */
+.toast-container {
+  position: fixed;
+  right: 1.25rem;
+  top: 4.5rem;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.45rem;
+  max-width: min(380px, calc(100vw - 2.5rem));
+  pointer-events: none;
+}
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0.4rem 0.5rem 0.4rem 0.8rem;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(16, 24, 40, 0.14);
+  pointer-events: auto;
+  animation: toast-in 0.2s ease-out;
+}
+/* Mêmes couleurs que les pastilles d'état de la liste */
+.toast-success {
+  background: #e1f4e8;
+  color: #17653a;
+} /* comme « En service » */
+.toast-info {
+  background: #e6eefb;
+  color: #25508f;
+} /* comme « En stock » */
+.toast-error {
+  background: #fde7e4;
+  color: #a3281d;
+} /* comme « Perdu » */
+.toast-message {
+  flex: 1;
+}
+.toast-close {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  opacity: 0.6;
+  font-size: 1.15rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 0.3rem;
+  border-radius: 6px;
+}
+.toast-close:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.07);
+}
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

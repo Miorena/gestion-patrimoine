@@ -2,8 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs';
-import { API_URL } from './api-url';
-import { UserProfile } from './models';
+import { API_URL } from '../http/api-url';
+import { UserProfile } from './auth.models';
 
 interface LoginResponse { accessToken: string; user: UserProfile; }
 

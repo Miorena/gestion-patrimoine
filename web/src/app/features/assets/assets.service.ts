@@ -1,8 +1,11 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, shareReplay } from 'rxjs';
-import { API_URL } from './api-url';
-import { Asset, AssetPayload, HistoryEntry, Lookups, Page } from './models';
+import { API_URL } from '../../core/http/api-url';
+import { Asset, AssetPayload } from './models/asset.model';
+import { HistoryEntry } from './models/history.model';
+import { Lookups } from './models/lookup.model';
+import { Page } from '../../shared/models/page.model';
 
 export interface AssetFilters {
 	page: number;
