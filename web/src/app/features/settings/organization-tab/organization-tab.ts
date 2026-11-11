@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { errorMessage } from '../../../core/http/http-error';
 import { ToastService } from '../../../core/toast/toast.service';
@@ -15,7 +15,7 @@ interface PendingDelete {
 
 @Component({
 	selector: 'app-organization-tab',
-	imports: [ReactiveFormsModule],
+	imports: [ReactiveFormsModule, FormsModule],
 	templateUrl: './organization-tab.html',
 })
 export class OrganizationTab {

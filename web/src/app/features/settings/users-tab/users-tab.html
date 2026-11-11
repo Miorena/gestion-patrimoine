@@ -2,7 +2,16 @@
   <p class="muted">{{ users().length }} utilisateur(s)</p>
   @if (!creating()) {
     <button type="button" class="btn btn-primary" (click)="openForm()">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+      <svg
+        width="16"
+        height="16"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.2"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
         <path d="M12 5v14M5 12h14" />
       </svg>
       Nouvel utilisateur
@@ -34,7 +43,60 @@
       </div>
       <div class="field">
         <label for="user-password">Mot de passe <span class="req">*</span></label>
-        <input id="user-password" type="password" formControlName="password" autocomplete="new-password" />
+        <div class="password-wrap">
+          <input
+            id="user-password"
+            [type]="showPassword() ? 'text' : 'password'"
+            formControlName="password"
+            autocomplete="new-password"
+          />
+          <button
+            type="button"
+            class="toggle-password"
+            (click)="toogleShowPassword()"
+            [attr.aria-label]="
+              showPassword() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'
+            "
+            [attr.aria-pressed]="showPassword()"
+            [title]="showPassword() ? 'Masquer le mot de passe' : 'Afficher le mot de passe'"
+          >
+            @if (showPassword()) {
+              <!-- Œil barré : le mot de passe est visible, un clic le masque -->
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path
+                  d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+                />
+                <path d="M1 1l22 22" />
+              </svg>
+            } @else {
+              <!-- Œil ouvert : le mot de passe est masqué, un clic l'affiche -->
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            }
+          </button>
+        </div>
         @if (form.controls.password.touched && form.controls.password.invalid) {
           <small class="error">8 caractères minimum.</small>
         }
@@ -84,11 +146,15 @@
             <select
               [attr.aria-label]="'Rôle de ' + user.name"
               [disabled]="user.id === currentUserId()"
-              [title]="user.id === currentUserId() ? 'Vous ne pouvez pas modifier votre propre rôle' : ''"
+              [title]="
+                user.id === currentUserId() ? 'Vous ne pouvez pas modifier votre propre rôle' : ''
+              "
               (change)="changeRole(user, $any($event.target).value)"
             >
               @for (role of roles(); track role.id) {
-                <option [value]="role.id" [selected]="role.id === user.roleId">{{ role.label }}</option>
+                <option [value]="role.id" [selected]="role.id === user.roleId">
+                  {{ role.label }}
+                </option>
               }
             </select>
           </td>
@@ -102,4 +168,6 @@
   </table>
 </div>
 
-<p class="settings-note">Un nouveau rôle s'applique à la prochaine connexion de l'utilisateur concerné.</p>
+<p class="settings-note">
+  Un nouveau rôle s'applique à la prochaine connexion de l'utilisateur concerné.
+</p>

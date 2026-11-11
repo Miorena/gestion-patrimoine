@@ -23,6 +23,7 @@ export class UsersTab {
 	protected readonly error = signal<string | null>(null);
 	protected readonly creating = signal(false); // le formulaire d'ajout est ouvert
 	protected readonly saving = signal(false);
+	protected readonly showPassword = signal(false);
 
 	// Un administrateur ne peut pas changer son propre rôle (l'API le refuse aussi)
 	protected readonly currentUserId = computed(() => this.auth.user()?.id ?? null);
@@ -41,8 +42,13 @@ export class UsersTab {
 		this.load();
 	}
 
+	protected toogleShowPassword() {
+		this.showPassword.update((visible) => !visible);
+	}
+
 	protected openForm() {
 		this.form.reset();
+		this.showPassword.set(false); // le mot de passe repart masqué à chaque ouverture
 		this.creating.set(true);
 	}
 
