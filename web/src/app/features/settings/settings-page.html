@@ -1,0 +1,39 @@
+<section class="settings-card">
+  <header class="settings-head">
+    <div class="page-title">
+      <h1>Paramètres</h1>
+      <p class="subtitle">Gérez les utilisateurs et l'organisation de l'établissement.</p>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button
+      type="button"
+      role="tab"
+      class="tab"
+      [class.active]="tab() === 'users'"
+      [attr.aria-selected]="tab() === 'users'"
+      (click)="tab.set('users')"
+    >
+      Utilisateurs
+    </button>
+    <button
+      type="button"
+      role="tab"
+      class="tab"
+      [class.active]="tab() === 'organization'"
+      [attr.aria-selected]="tab() === 'organization'"
+      (click)="tab.set('organization')"
+    >
+      Organisation
+    </button>
+  </nav>
+
+  <div class="settings-body">
+    @if (tab() === 'users') {
+      <app-users-tab />
+    } @else {
+      <app-organization-tab />
+    }
+  </div>
+</section>

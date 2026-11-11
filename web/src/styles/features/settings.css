@@ -1,0 +1,218 @@
+/* ---------- Page « Paramètres » ---------- */
+app-settings-page {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+.settings-card {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+.settings-head {
+  padding: 1.1rem 1.5rem 0.9rem;
+}
+.settings-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 1.1rem 1.5rem 1.5rem;
+}
+.tab-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+}
+.tab-toolbar p {
+  margin: 0;
+}
+.settings-note {
+  margin: 0.75rem 0 0;
+  font-size: 0.84rem;
+  color: var(--muted);
+}
+
+/* Formulaires d'ajout affichés dans la page */
+.inline-card {
+  margin-bottom: 1rem;
+  padding: 1rem 1.1rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-alt);
+}
+.inline-card h2 {
+  margin-bottom: 0.75rem;
+}
+.inline-card.nested {
+  margin: 0.4rem 0 0.6rem 1.6rem;
+}
+.inline-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0 1rem;
+}
+.inline-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin: 0.2rem 0 0.7rem;
+}
+.req {
+  color: var(--danger);
+}
+
+.table-wrap {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: auto;
+}
+.table-wrap td.strong {
+  font-weight: 600;
+}
+.role-cell select {
+  max-width: 240px;
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
+  font-size: 0.9rem;
+}
+
+/* Arbre direction > service > agent */
+.org-tree,
+.org-children {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.org-children {
+  margin-left: 1.6rem;
+  padding-left: 0.8rem;
+  border-left: 2px solid var(--border);
+}
+.org-node {
+  margin-bottom: 0.15rem;
+}
+.org-direction {
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+}
+.org-tree > .org-node {
+  margin-bottom: 0.6rem;
+}
+.org-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.35rem 0.5rem 0.35rem 0.4rem;
+  border-radius: 8px;
+}
+.org-row:hover {
+  background: var(--surface-alt);
+}
+.org-direction:hover {
+  background: var(--primary-soft);
+}
+.org-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+  padding: 0.3rem 0.2rem;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.org-toggle:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+  border-radius: 6px;
+}
+.org-caret {
+  display: inline-block;
+  width: 1rem;
+  font-size: 1.2rem;
+  line-height: 1;
+  color: var(--muted);
+  transition: transform 0.15s;
+}
+.org-caret.open {
+  transform: rotate(90deg);
+}
+.org-count {
+  font-size: 0.82rem;
+}
+.org-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.org-agent {
+  padding-left: 1.6rem;
+  font-size: 0.92rem;
+}
+.org-empty {
+  padding: 0.4rem 0.6rem 0.4rem 1.6rem;
+  font-size: 0.86rem;
+  color: var(--muted);
+  font-style: italic;
+}
+.icon-btn.danger:hover {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+/* Confirmation de suppression */
+.confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(16, 24, 40, 0.45);
+}
+.confirm-box {
+  position: fixed;
+  z-index: 71;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(440px, calc(100vw - 2rem));
+  padding: 1.5rem;
+  border-radius: 12px;
+  background: var(--surface);
+  box-shadow: 0 20px 50px rgba(16, 24, 40, 0.25);
+}
+.confirm-box h2 {
+  font-size: 1.1rem;
+  margin: 0 0 0.5rem;
+}
+.confirm-box p {
+  margin: 0 0 1.25rem;
+  font-size: 0.92rem;
+}
+.btn-danger {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: #fff;
+}
+.btn-danger:hover:not(:disabled) {
+  background: #912018;
+  border-color: #912018;
+}
+
+@media (max-width: 700px) {
+  .org-row {
+    flex-wrap: wrap;
+  }
+}

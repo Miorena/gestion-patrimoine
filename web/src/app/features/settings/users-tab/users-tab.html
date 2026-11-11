@@ -1,0 +1,105 @@
+<div class="tab-toolbar">
+  <p class="muted">{{ users().length }} utilisateur(s)</p>
+  @if (!creating()) {
+    <button type="button" class="btn btn-primary" (click)="openForm()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
+        <path d="M12 5v14M5 12h14" />
+      </svg>
+      Nouvel utilisateur
+    </button>
+  }
+</div>
+
+@if (error(); as message) {
+  <div class="alert alert-error" role="alert">{{ message }}</div>
+}
+
+@if (creating()) {
+  <form class="inline-card" [formGroup]="form" (ngSubmit)="submit()">
+    <h2>Nouvel utilisateur</h2>
+    <div class="inline-grid">
+      <div class="field">
+        <label for="user-name">Nom <span class="req">*</span></label>
+        <input id="user-name" formControlName="name" maxlength="150" autocomplete="off" />
+        @if (form.controls.name.touched && form.controls.name.invalid) {
+          <small class="error">Le nom est obligatoire.</small>
+        }
+      </div>
+      <div class="field">
+        <label for="user-email">Adresse e-mail <span class="req">*</span></label>
+        <input id="user-email" type="email" formControlName="email" autocomplete="off" />
+        @if (form.controls.email.touched && form.controls.email.invalid) {
+          <small class="error">Saisissez une adresse e-mail valide.</small>
+        }
+      </div>
+      <div class="field">
+        <label for="user-password">Mot de passe <span class="req">*</span></label>
+        <input id="user-password" type="password" formControlName="password" autocomplete="new-password" />
+        @if (form.controls.password.touched && form.controls.password.invalid) {
+          <small class="error">8 caractères minimum.</small>
+        }
+      </div>
+      <div class="field">
+        <label for="user-role">Rôle <span class="req">*</span></label>
+        <select id="user-role" formControlName="roleId">
+          <option [ngValue]="null" disabled>Choisir un rôle…</option>
+          @for (role of roles(); track role.id) {
+            <option [ngValue]="role.id">{{ role.label }}</option>
+          }
+        </select>
+        @if (form.controls.roleId.touched && form.controls.roleId.invalid) {
+          <small class="error">Choisissez un rôle.</small>
+        }
+      </div>
+    </div>
+    <div class="inline-actions">
+      <button type="button" class="btn" [disabled]="saving()" (click)="closeForm()">Annuler</button>
+      <button type="submit" class="btn btn-primary" [disabled]="saving()">
+        {{ saving() ? 'Enregistrement…' : 'Ajouter' }}
+      </button>
+    </div>
+  </form>
+}
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Nom</th>
+        <th>Adresse e-mail</th>
+        <th>Rôle</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (user of users(); track user.id) {
+        <tr>
+          <td class="strong">
+            {{ user.name }}
+            @if (user.id === currentUserId()) {
+              <span class="badge">Vous</span>
+            }
+          </td>
+          <td>{{ user.email }}</td>
+          <td class="role-cell">
+            <select
+              [attr.aria-label]="'Rôle de ' + user.name"
+              [disabled]="user.id === currentUserId()"
+              [title]="user.id === currentUserId() ? 'Vous ne pouvez pas modifier votre propre rôle' : ''"
+              (change)="changeRole(user, $any($event.target).value)"
+            >
+              @for (role of roles(); track role.id) {
+                <option [value]="role.id" [selected]="role.id === user.roleId">{{ role.label }}</option>
+              }
+            </select>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="3" class="empty">{{ loading() ? 'Chargement…' : 'Aucun utilisateur.' }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+<p class="settings-note">Un nouveau rôle s'applique à la prochaine connexion de l'utilisateur concerné.</p>

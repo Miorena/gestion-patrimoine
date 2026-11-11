@@ -1,6 +1,7 @@
-import { Component, ElementRef, effect, inject, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from './core/auth/auth.service';
+import { ROLE } from './core/auth/auth.models';
 import { ToastService } from './core/toast/toast.service';
 
 @Component({
@@ -15,6 +16,8 @@ export class App {
 	protected readonly logoutDialog = viewChild<ElementRef<HTMLDialogElement>>('logoutDialog');
 
 	protected readonly menuOpen = signal(false);
+	// Les paramètres (utilisateurs, organisation) ne concernent que l'administrateur
+	protected readonly isAdmin = computed(() => this.auth.user()?.role === ROLE.ADMINISTRATOR);
 
 	constructor() {
 		// Une déconnexion (ou une session expirée) referme toujours le menu
@@ -29,11 +32,6 @@ export class App {
 
 	closeMenu() {
 		this.menuOpen.set(false);
-	}
-
-	protected openSettings() {
-		this.closeMenu();
-		this.toast.info('En cours de développement...');
 	}
 
 	protected askLogout() {
