@@ -1,2 +1,2 @@
-// Base URL of the NestJS API (change for production)
-export const API_URL = 'http://localhost:3000/api';
+// Base URL of the NestJS API: relative, so it works from any device (nginx / the dev proxy forward /api)
+export const API_URL = '/api';

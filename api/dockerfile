@@ -1,0 +1,18 @@
+# --- Étape 1 : compilation ---
+FROM node:24-slim AS build
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# --- Étape 2 : image finale, sans les outils de développement ---
+FROM node:24-slim
+WORKDIR /app
+ENV NODE_ENV=production
+COPY package*.json ./
+RUN npm ci --omit=dev
+COPY --from=build /app/dist ./dist
+EXPOSE 3000
+# Crée ou met à jour les tables (sans effet si c'est déjà fait), puis démarre l'API
+CMD ["sh", "-c", "node_modules/.bin/typeorm migration:run -d dist/database/data-source.js && node dist/main"]

@@ -1,0 +1,44 @@
+name: patrimoine
+
+services:
+  db:
+    image: postgres:18
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: patrimoine
+      POSTGRES_PASSWORD: patrimoine
+      POSTGRES_DB: patrimoine
+    ports:
+      - "127.0.0.1:5433:5432" # accessible seulement depuis cette machine (DBeaver), pas depuis le réseau
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U patrimoine -d patrimoine"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: ./api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://patrimoine:patrimoine@db:5432/patrimoine
+      JWT_SECRET: ${JWT_SECRET:?Définir JWT_SECRET dans le fichier .env à la racine}
+      JWT_EXPIRES_IN_SECONDS: 28800
+      PORT: 3000
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build: ./web
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
+    external: true # reprend ton volume actuel, qui contient les données restaurées depuis Neon
+    name: patrimoine-pg18
