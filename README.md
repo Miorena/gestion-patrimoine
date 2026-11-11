@@ -82,7 +82,7 @@ gestion-patrimoine/
 │   │   │   └── dto/ · entities/ · enums/
 │   │   ├── common/               code transversal (transformer des NUMERIC)
 │   │   └── database/             migration, script SQL v2, seed
-│   └── Dockerfile
+│   └── dockerfile
 ├── web/                          Interface Angular
 │   ├── src/
 │   │   ├── styles.css            ne contient que des @import
@@ -98,7 +98,7 @@ gestion-patrimoine/
 │   │           └── assets/       service, models/, utils/, constantes,
 │   │                             asset-list/ et asset-panel/ (liste + panneau de détail)
 │   ├── nginx.conf · proxy.conf.json
-│   └── Dockerfile
+│   └── dockerfile
 ├── docs/carnet_de_bord.md        décisions techniques et leurs raisons
 ├── docker-compose.yml
 └── README.md
