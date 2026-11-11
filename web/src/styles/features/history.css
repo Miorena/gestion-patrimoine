@@ -1,0 +1,112 @@
+/* ---------- Page « Historique » (tous les biens) ---------- */
+app-history-page {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+.history-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+.history-head {
+  padding: 1.1rem 1.25rem 0.9rem;
+}
+.history-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px;
+  gap: 0.5rem;
+  padding: 0 1.25rem 0.9rem;
+  border-bottom: 1px solid var(--border);
+}
+.history-filters select {
+  font-size: 0.9rem;
+}
+.history-alert {
+  margin: 0.75rem 1.25rem 0;
+}
+.history-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+.history-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 0;
+}
+.history-table td {
+  padding: 0.7rem 1rem;
+}
+.history-table th:first-child,
+.history-table td:first-child {
+  padding-left: 1.25rem;
+}
+.history-table th:last-child {
+  padding: 0.8rem 1rem;
+}
+.history-table tbody tr:hover {
+  background: var(--surface-alt);
+}
+
+/* En-têtes cliquables pour trier */
+.sort-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  font-weight: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.history-table th:first-child .sort-btn {
+  padding-left: 1.25rem;
+}
+.sort-btn:hover,
+.sort-btn.active {
+  color: var(--primary);
+}
+.sort-btn:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+.sort-arrow {
+  font-size: 0.85rem;
+  opacity: 0.55;
+}
+.sort-btn.active .sort-arrow {
+  opacity: 1;
+}
+
+.history-asset {
+  display: block;
+  font-weight: 600;
+}
+.history-dot {
+  display: inline-block;
+  width: 0.6rem;
+  height: 0.6rem;
+  margin-right: 0.45rem;
+  border-radius: 50%;
+}
+
+@media (max-width: 700px) {
+  .history-filters {
+    grid-template-columns: 1fr;
+  }
+}

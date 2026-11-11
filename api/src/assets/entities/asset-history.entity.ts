@@ -1,5 +1,6 @@
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
+import { Asset } from './asset.entity';
 
 // Append-only (a database trigger forbids UPDATE and DELETE)
 @Entity('historique')
@@ -18,6 +19,9 @@ export class AssetHistory {
 
 	@Column({ name: 'id_bien' })
 	assetId: number;
+	@ManyToOne(() => Asset, { nullable: false, onDelete: 'RESTRICT' })
+	@JoinColumn({ name: 'id_bien' })
+	asset: Asset;
 
 	@Column({ name: 'id_utilisateur' })
 	userId: number;

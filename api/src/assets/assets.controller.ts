@@ -6,6 +6,7 @@ import { RoleName } from '../users/enums/role-name.enum';
 import { AssetsService } from './assets.service';
 import { CreateAssetDto } from './dto/create-asset.dto';
 import { ListAssetsQueryDto } from './dto/list-assets-query.dto';
+import { ListHistoryQueryDto } from './dto/list-history-query.dto';
 import { UpdateAssetDto } from './dto/update-asset.dto';
 
 @Controller('assets')
@@ -16,6 +17,12 @@ export class AssetsController {
 	@Get()
 	findAll(@Query() query: ListAssetsQueryDto) {
 		return this.assetsService.findAll(query);
+	}
+
+	// Global history (all assets): declared before ':id' so that "history" is not read as an id
+	@Get('history')
+	findAllHistory(@Query() query: ListHistoryQueryDto) {
+		return this.assetsService.findAllHistory(query);
 	}
 
 	@Get(':id')

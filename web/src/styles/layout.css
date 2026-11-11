@@ -4,24 +4,13 @@
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
-  padding: 0.7rem 1.75rem;
+  height: var(--topbar-h);
+  padding: 0 1.75rem 0 1rem;
   background: var(--primary);
+  position: relative;
+  z-index: 60;
   color: #fff;
   box-shadow: 0 1px 3px rgba(16, 24, 40, 0.2);
-}
-.brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-weight: 650;
-  color: #fff;
-  letter-spacing: 0.01em;
-}
-.brand:hover {
-  text-decoration: none;
-}
-.brand svg {
-  opacity: 0.9;
 }
 .topbar-user {
   display: flex;
@@ -34,13 +23,6 @@
   color: #fff;
   margin-left: 0.4rem;
 }
-.topbar .btn-ghost {
-  color: #fff;
-}
-.topbar .btn-ghost:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.12);
-}
-
 .container {
   flex: 1;
   min-height: 0;
@@ -72,4 +54,143 @@ app-asset-list {
   flex-direction: column;
   flex: 1;
   min-height: 0;
+}
+
+/* ---------- Bouton du menu (barre du haut) ---------- */
+:root {
+  --topbar-h: 56px;
+  --side-w: 270px;
+}
+.menu-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.menu-toggle:hover,
+.menu-toggle.open {
+  background: rgba(255, 255, 255, 0.14);
+}
+.menu-toggle:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* ---------- Menu latéral : panneau qui coulisse sous la barre du haut ---------- */
+.side-backdrop {
+  position: fixed;
+  inset: var(--topbar-h) 0 0 0;
+  z-index: 40;
+  background: rgba(16, 24, 40, 0.38);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.2s,
+    visibility 0s linear 0.2s;
+}
+.side-backdrop.open {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.2s;
+}
+.side-menu {
+  position: fixed;
+  top: var(--topbar-h);
+  bottom: 0;
+  left: 0;
+  z-index: 50;
+  width: var(--side-w);
+  max-width: 85vw;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 0.75rem 1rem;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  box-shadow: 4px 0 24px rgba(16, 24, 40, 0.14);
+  transform: translateX(-100%);
+  visibility: hidden;
+  transition:
+    transform 0.22s ease,
+    visibility 0s linear 0.22s;
+}
+.side-menu.open {
+  transform: none;
+  visibility: visible;
+  transition: transform 0.22s ease;
+}
+.side-menu-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.25rem 0.75rem 1rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+  font-weight: 650;
+  color: var(--primary);
+}
+.side-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.2rem;
+}
+.side-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 550;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+.side-link:hover {
+  background: var(--primary-soft);
+  color: var(--primary);
+  text-decoration: none;
+}
+.side-link.active {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+.side-link:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+/* Déconnexion : tout en bas du panneau, en rouge */
+.side-logout {
+  margin-top: auto;
+  color: var(--danger);
+  border-top: 1px solid var(--border);
+  border-radius: 0 0 8px 8px;
+  padding-top: 0.9rem;
+  padding-bottom: 0.9rem;
+}
+.side-logout:hover {
+  background: var(--danger-bg);
+  color: var(--danger);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .side-menu,
+  .side-backdrop {
+    transition: none;
+  }
 }

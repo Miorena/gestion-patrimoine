@@ -7,6 +7,7 @@ import { Location } from '../lookups/entities/location.entity';
 import { State } from '../lookups/entities/state.entity';
 import { CreateAssetDto, EquipmentDto, RealEstateDto } from './dto/create-asset.dto';
 import { ListAssetsQueryDto } from './dto/list-assets-query.dto';
+import { ListHistoryQueryDto } from './dto/list-history-query.dto';
 import { UpdateAssetDto } from './dto/update-asset.dto';
 import { AssetEquipment } from './entities/asset-equipment.entity';
 import { AssetHistory } from './entities/asset-history.entity';
@@ -93,6 +94,57 @@ export class AssetsService {
 			details: row.details,
 			userName: row.user.name,
 		}));
+	}
+
+	// Global history: every event of every asset, with search, filter, sort and pagination
+	async findAllHistory(query: ListHistoryQueryDto) {
+		const { page, limit, search, action, sort, order } = query;
+
+		// Whitelist: the sort key coming from the client never goes into the SQL as is
+		const sortColumns = {
+			date: 'history.createdAt',
+			action: 'history.action',
+			asset: 'asset.code',
+			user: 'user.name',
+		} as const;
+
+		const applyFilters = (qb: SelectQueryBuilder<AssetHistory>) => {
+			if (search?.trim()) {
+				const term = `%${search.trim().replace(/[\\%_]/g, '\\$&')}%`;
+				qb.andWhere(
+					'(asset.designation ILIKE :term OR asset.code ILIKE :term OR user.name ILIKE :term OR history.details ILIKE :term)',
+					{ term },
+				);
+			}
+			if (action) qb.andWhere('history.action = :action', { action });
+			return qb;
+		};
+
+		const base = () =>
+			this.historyRepository
+				.createQueryBuilder('history')
+				.innerJoinAndSelect('history.asset', 'asset')
+				.innerJoinAndSelect('history.user', 'user');
+
+		const itemsQuery = applyFilters(base())
+			.orderBy(sortColumns[sort], order)
+			.addOrderBy('history.id', order)
+			.offset((page - 1) * limit)
+			.limit(limit);
+		const countQuery = applyFilters(base());
+
+		const [rows, total] = await Promise.all([itemsQuery.getMany(), countQuery.getCount()]);
+		const items = rows.map((row) => ({
+			id: row.id,
+			createdAt: row.createdAt,
+			action: row.action,
+			details: row.details,
+			userName: row.user.name,
+			assetId: row.assetId,
+			assetCode: row.asset.code,
+			assetDesignation: row.asset.designation,
+		}));
+		return { items, total, page, limit };
 	}
 
 	// ---------- Writes ----------

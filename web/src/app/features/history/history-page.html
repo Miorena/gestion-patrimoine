@@ -1,0 +1,109 @@
+<section class="history-card">
+  <header class="history-head">
+    <div class="page-title">
+      <h1>Historique</h1>
+      <p class="subtitle">{{ total() }} événement(s) sur l'ensemble des biens</p>
+    </div>
+  </header>
+
+  <div class="history-filters">
+    <input
+      type="search"
+      class="search"
+      [formControl]="search"
+      placeholder="Rechercher (bien, code, utilisateur, détail)…"
+      aria-label="Rechercher dans l'historique"
+    />
+    <select [formControl]="action" aria-label="Filtrer par type d'action">
+      <option value="">Toutes les actions</option>
+      @for (item of actions; track item.value) {
+        <option [value]="item.value">{{ item.label }}</option>
+      }
+    </select>
+  </div>
+
+  @if (error(); as message) {
+    <div class="alert alert-error history-alert" role="alert">{{ message }}</div>
+  }
+
+  <div class="history-scroll">
+    @if (loading()) {
+      <div class="progress" role="progressbar" aria-label="Chargement"></div>
+    }
+    <table class="history-table">
+      <thead>
+        <tr>
+          <th [attr.aria-sort]="ariaSort('date')">
+            <button type="button" class="sort-btn" [class.active]="sort() === 'date'" (click)="sortBy('date')">
+              Date <span class="sort-arrow" aria-hidden="true">{{ sort() === 'date' ? (order() === 'ASC' ? '↑' : '↓') : '↕' }}</span>
+            </button>
+          </th>
+          <th [attr.aria-sort]="ariaSort('asset')">
+            <button type="button" class="sort-btn" [class.active]="sort() === 'asset'" (click)="sortBy('asset')">
+              Bien <span class="sort-arrow" aria-hidden="true">{{ sort() === 'asset' ? (order() === 'ASC' ? '↑' : '↓') : '↕' }}</span>
+            </button>
+          </th>
+          <th [attr.aria-sort]="ariaSort('action')">
+            <button type="button" class="sort-btn" [class.active]="sort() === 'action'" (click)="sortBy('action')">
+              Action <span class="sort-arrow" aria-hidden="true">{{ sort() === 'action' ? (order() === 'ASC' ? '↑' : '↓') : '↕' }}</span>
+            </button>
+          </th>
+          <th [attr.aria-sort]="ariaSort('user')">
+            <button type="button" class="sort-btn" [class.active]="sort() === 'user'" (click)="sortBy('user')">
+              Utilisateur <span class="sort-arrow" aria-hidden="true">{{ sort() === 'user' ? (order() === 'ASC' ? '↑' : '↓') : '↕' }}</span>
+            </button>
+          </th>
+          <th>Détails</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.id) {
+          <tr>
+            <td class="nowrap">{{ row.createdAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+            <td>
+              <span class="history-asset">{{ row.assetDesignation }}</span>
+              <span class="code">{{ row.assetCode }}</span>
+            </td>
+            <td class="nowrap">
+              <span class="history-dot" [class]="'history-dot ' + dotClass(row.action)"></span>
+              {{ row.actionLabel }}
+            </td>
+            <td class="nowrap">{{ row.userName }}</td>
+            <td>
+              @if (row.changes.length > 0) {
+                <ul class="changes">
+                  @for (change of row.changes; track change.label) {
+                    <li>
+                      <span class="change-label">{{ change.label }}</span>
+                      @if (change.from !== null) {
+                        <span class="change-from" [class.is-empty]="change.fromEmpty">{{ change.from }}</span>
+                        <span class="change-arrow">→</span>
+                      }
+                      <span class="change-to" [class.is-empty]="change.toEmpty">{{ change.to }}</span>
+                    </li>
+                  }
+                </ul>
+              } @else if (row.text) {
+                <span class="plain-text">{{ row.text }}</span>
+              } @else {
+                <span class="muted">—</span>
+              }
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="5" class="empty">{{ loading() ? 'Chargement…' : 'Aucun événement trouvé.' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <footer class="list-footer">
+    <span>Page {{ page() }} / {{ pageCount() }}</span>
+    <div class="pager">
+      <button type="button" class="btn btn-sm" [disabled]="page() <= 1" (click)="goTo(page() - 1)">Précédent</button>
+      <button type="button" class="btn btn-sm" [disabled]="page() >= pageCount()" (click)="goTo(page() + 1)">Suivant</button>
+    </div>
+  </footer>
+</section>

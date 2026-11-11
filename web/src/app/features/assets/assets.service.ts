@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, shareReplay } from 'rxjs';
 import { API_URL } from '../../core/http/api-url';
 import { Asset, AssetPayload } from './models/asset.model';
-import { HistoryEntry } from './models/history.model';
+import { GlobalHistoryEntry, HistoryEntry, HistorySortKey } from './models/history.model';
 import { Lookups } from './models/lookup.model';
 import { Page } from '../../shared/models/page.model';
 
@@ -13,6 +13,15 @@ export interface AssetFilters {
 	search?: string;
 	categoryId?: number | null;
 	stateId?: number | null;
+}
+
+export interface HistoryFilters {
+	page: number;
+	limit: number;
+	search?: string;
+	action?: string;
+	sort: HistorySortKey;
+	order: 'ASC' | 'DESC';
 }
 
 @Injectable({ providedIn: 'root' })
@@ -41,6 +50,18 @@ export class AssetsService {
 
 	history(id: number) {
 		return this.http.get<HistoryEntry[]>(`${this.url}/${id}/history`);
+	}
+
+	// Historique de tous les biens (page « Historique » du menu)
+	globalHistory(filters: HistoryFilters) {
+		let params = new HttpParams()
+			.set('page', filters.page)
+			.set('limit', filters.limit)
+			.set('sort', filters.sort)
+			.set('order', filters.order);
+		if (filters.search) params = params.set('search', filters.search);
+		if (filters.action) params = params.set('action', filters.action);
+		return this.http.get<Page<GlobalHistoryEntry>>(`${this.url}/history`, { params });
 	}
 
 	create(payload: AssetPayload) {

@@ -9,6 +9,12 @@ export const routes: Routes = [
 		canActivate: [authGuard],
 		loadComponent: () => import('./features/assets/asset-list/asset-list').then((m) => m.AssetList),
 	},
+	{
+		// Historique de tous les biens, avec recherche et tri
+		path: 'history',
+		canActivate: [authGuard],
+		loadComponent: () => import('./features/history/history-page').then((m) => m.HistoryPage),
+	},
 	{ path: '', pathMatch: 'full', redirectTo: 'assets' },
 	{ path: '**', redirectTo: 'assets' },
 ];
