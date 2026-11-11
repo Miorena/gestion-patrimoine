@@ -5,7 +5,7 @@ import { Category } from './entities/category.entity';
 import { Location } from './entities/location.entity';
 import { State } from './entities/state.entity';
 
-// Read-only reference data needed by the asset form (full CRUD comes later)
+// Données de référence en lecture seule nécessaires au formulaire de bien (le CRUD complet viendra plus tard)
 @Controller('lookups')
 export class LookupsController {
   constructor(

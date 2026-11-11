@@ -37,7 +37,7 @@ export interface Asset {
 	realEstate: RealEstate | null;
 }
 
-// Body sent to POST /assets and PATCH /assets/:id
+// Corps envoyé à POST /assets et PATCH /assets/:id
 export interface AssetPayload {
 	designation: string;
 	acquisitionDate: string;

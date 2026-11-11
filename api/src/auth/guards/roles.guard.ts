@@ -3,7 +3,7 @@ import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 import { RoleName } from '../../users/enums/role-name.enum';
 
-// Global guard: checks the @Roles() restriction (runs after JwtAuthGuard)
+// Guard global : vérifie la restriction @Roles() (s'exécute après JwtAuthGuard)
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}

@@ -10,11 +10,11 @@ export class ListHistoryQueryDto {
 	@IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(100)
 	limit: number = 20;
 
-	// Matches the asset code or designation, the user name or the details
+	// Correspond au code ou à la désignation du bien, au nom de l'utilisateur ou aux détails
 	@IsOptional() @IsString()
 	search?: string;
 
-	// Exact action code (ASSET_CREATED, ASSET_UPDATED, ACQUISITION_VALIDATED)
+	// Code d'action exact (ASSET_CREATED, ASSET_UPDATED, ACQUISITION_VALIDATED)
 	@IsOptional() @IsString()
 	action?: string;
 

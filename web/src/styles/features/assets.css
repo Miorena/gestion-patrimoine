@@ -1,5 +1,5 @@
 /* ======================================================================
-   Workspace : liste des biens (gauche) + panneau de détail (droite)
+   Espace de travail : liste des biens (gauche) + panneau de détail (droite)
    ====================================================================== */
 .workspace {
   display: grid;

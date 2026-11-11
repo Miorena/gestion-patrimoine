@@ -2,12 +2,12 @@ import { BadRequestException } from '@nestjs/common';
 import { AssetFamily } from '../lookups/enums/asset-family.enum';
 import { EquipmentDto, RealEstateDto } from './dto/create-asset.dto';
 
-// Business rules checked by the service before writing (pure functions: no database access)
+// Règles métier vérifiées par le service avant écriture (fonctions pures : aucun accès à la base)
 
-// Label of the "in service" state (RG04: only allowed once the acquisition is validated)
+// Libellé de l'état « en service » (RG04 : autorisé uniquement une fois l'acquisition validée)
 export const IN_SERVICE_LABEL = 'En service';
 
-// Fields compared to build the history of an update
+// Champs comparés pour construire l'historique d'une modification
 export const TRACKED_FIELDS = [
 	'designation', 'acquisitionDate', 'acquisitionValue', 'acquisitionMode',
 	'managedByLot', 'quantity', 'notes', 'categoryId', 'stateId', 'locationId',
@@ -18,7 +18,7 @@ export function assertDateNotInFuture(date: string) {
 	if (date > today) throw new BadRequestException('The acquisition date cannot be in the future');
 }
 
-// A standalone asset has quantity 1; real estate is never managed by lot
+// Un bien hors lot a une quantité de 1 ; l'immobilier n'est jamais géré par lot
 export function assertLotConsistency(family: AssetFamily, managedByLot: boolean, quantity: number) {
 	if (family === AssetFamily.REAL_ESTATE && managedByLot) {
 		throw new BadRequestException('Real estate cannot be managed by lot');
@@ -28,7 +28,7 @@ export function assertLotConsistency(family: AssetFamily, managedByLot: boolean,
 	}
 }
 
-// Extension must match category.family (equipment XOR real estate)
+// L'extension doit correspondre à category.family (équipement XOR immobilier)
 export function assertExtensionMatchesFamily(
 	family: AssetFamily,
 	equipment: EquipmentDto | undefined,

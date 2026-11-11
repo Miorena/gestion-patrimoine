@@ -29,7 +29,7 @@ export class AssetsService {
 	private readonly http = inject(HttpClient);
 	private readonly url = `${API_URL}/assets`;
 
-	// Reference data (categories, states, locations) changes rarely: fetched once, then reused
+	// Les listes de référence (catégories, états, localisations) changent rarement : chargées une fois, puis réutilisées
 	private lookups$?: Observable<Lookups>;
 
 	lookups() {

@@ -7,7 +7,7 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
   app.enableCors({ origin: process.env.FRONTEND_URL ?? 'http://localhost:4200' });
-  // Validates DTOs, strips unknown fields and rejects them
+  // Valide les DTO, retire les champs inconnus et les rejette
   app.useGlobalPipes(
     new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
   );

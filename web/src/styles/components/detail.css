@@ -1,4 +1,4 @@
-/* ---------- Detail ---------- */
+/* ---------- Détail ---------- */
 .details {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -19,7 +19,7 @@
   grid-column: 1 / -1;
 }
 
-/* ---------- History ---------- */
+/* ---------- Historique ---------- */
 .details-cell {
   font-size: 0.86rem;
 }

@@ -15,7 +15,7 @@ export class AssetRealEstate {
 	@Column({ name: 'adresse', length: 255 })
 	address: string;
 
-	// Surface area (m²)
+	// Superficie (m²)
 	@Column({ name: 'superficie', type: 'numeric', precision: 12, scale: 2, transformer: numericTransformer })
 	area: number;
 

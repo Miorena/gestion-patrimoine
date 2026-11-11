@@ -9,7 +9,7 @@ import { JwtService } from '@nestjs/jwt';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import { JwtPayload } from '../types/jwt-payload.interface';
 
-// Global guard: every route requires a valid token unless marked @Public()
+// Guard global : chaque route exige un jeton valide sauf si elle est marquée @Public()
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   constructor(

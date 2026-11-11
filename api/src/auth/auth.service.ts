@@ -20,7 +20,7 @@ export class AuthService {
       relations: { role: true },
     });
 
-    // Same message for unknown email and wrong password (no user enumeration)
+    // Même message pour un e-mail inconnu et un mauvais mot de passe (pas d'énumération des utilisateurs)
     const isValid = user && (await bcrypt.compare(password, user.passwordHash));
     if (!user || !isValid) {
       throw new UnauthorizedException('Invalid email or password');
@@ -42,7 +42,7 @@ export class AuthService {
     return this.toProfile(user);
   }
 
-  // Never expose the password hash
+  // N'expose jamais le hash du mot de passe
   private toProfile(user: User) {
     return { id: user.id, name: user.name, email: user.email, role: user.role.label };
   }

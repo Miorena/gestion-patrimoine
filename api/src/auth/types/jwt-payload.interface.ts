@@ -1,6 +1,6 @@
-// Content of the JWT signed at login
+// Contenu du JWT signé à la connexion
 export interface JwtPayload {
-  sub: number; // user id
+  sub: number; // identifiant de l'utilisateur
   email: string;
   role: string;
 }

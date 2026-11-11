@@ -2,9 +2,9 @@ import { config } from 'dotenv';
 import { join } from 'path';
 import { DataSource } from 'typeorm';
 
-config(); // loads .env
+config(); // charge le fichier .env
 
-// Used by the TypeORM CLI (migrations) and the seed script
+// Utilisé par la CLI TypeORM (migrations) et le script de seed
 export default new DataSource({
   type: 'postgres',
   url: process.env.DATABASE_URL,

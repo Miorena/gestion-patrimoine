@@ -1,4 +1,4 @@
-/* Global styles: each partial lives in src/styles/ (same order as before, so the cascade is unchanged) */
+/* Styles globaux : chaque partiel se trouve dans src/styles/ (même ordre qu'avant, donc la cascade est inchangée) */
 @import './styles/base.css';
 @import './styles/layout.css';
 @import './styles/components/card.css';

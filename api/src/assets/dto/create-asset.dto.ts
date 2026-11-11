@@ -58,11 +58,11 @@ export class CreateAssetDto {
 	@IsInt() stateId: number;
 	@IsInt() locationId: number;
 
-	// Allowed only when the category family is 'equipement'
+	// Autorisé uniquement lorsque la famille de la catégorie est 'equipement'
 	@IsOptional() @ValidateNested() @Type(() => EquipmentDto)
 	equipment?: EquipmentDto;
 
-	// Required when the category family is 'immobilier'
+	// Obligatoire lorsque la famille de la catégorie est 'immobilier'
 	@IsOptional() @ValidateNested() @Type(() => RealEstateDto)
 	realEstate?: RealEstateDto;
 }

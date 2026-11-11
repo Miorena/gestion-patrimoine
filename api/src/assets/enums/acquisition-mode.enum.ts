@@ -1,4 +1,4 @@
-// Values match the CHECK constraint on bien.mode_acquisition
+// Les valeurs correspondent à la contrainte CHECK sur bien.mode_acquisition
 export enum AcquisitionMode {
   PURCHASE = 'achat',
   DONATION = 'don_legs',

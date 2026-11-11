@@ -2,7 +2,7 @@ import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGenerat
 import { User } from '../../users/entities/user.entity';
 import { Asset } from './asset.entity';
 
-// Append-only (a database trigger forbids UPDATE and DELETE)
+// Ajout seul (un trigger de la base interdit UPDATE et DELETE)
 @Entity('historique')
 export class AssetHistory {
 	@PrimaryGeneratedColumn('identity', { name: 'id_historique', generatedIdentity: 'ALWAYS' })

@@ -1,6 +1,6 @@
 export interface UserProfile { id: number; name: string; email: string; role: string; }
 
-// Role labels (same values as the database)
+// Libellés des rôles (mêmes valeurs que la base de données)
 export const ROLE = {
 	ADMINISTRATOR: 'Administrateur',
 	MANAGER: 'Gestionnaire',

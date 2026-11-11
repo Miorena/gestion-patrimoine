@@ -13,13 +13,13 @@ import { UpdateAssetDto } from './dto/update-asset.dto';
 export class AssetsController {
 	constructor(private readonly assetsService: AssetsService) { }
 
-	// Reading is open to every authenticated user
+	// La lecture est ouverte à tout utilisateur authentifié
 	@Get()
 	findAll(@Query() query: ListAssetsQueryDto) {
 		return this.assetsService.findAll(query);
 	}
 
-	// Global history (all assets): declared before ':id' so that "history" is not read as an id
+	// Historique global (tous les biens) : déclaré avant ':id' pour que "history" ne soit pas lu comme un identifiant
 	@Get('history')
 	findAllHistory(@Query() query: ListHistoryQueryDto) {
 		return this.assetsService.findAllHistory(query);
@@ -47,7 +47,7 @@ export class AssetsController {
 		return this.assetsService.update(id, dto, user.sub);
 	}
 
-	// Assumption: validation belongs to the supervisor (and the administrator)
+	// Hypothèse : la validation revient au superviseur (et à l'administrateur)
 	@Roles(RoleName.ADMINISTRATOR, RoleName.SUPERVISOR)
 	@Post(':id/validate-acquisition')
 	@HttpCode(200)

@@ -8,7 +8,7 @@ export class ListAssetsQueryDto {
 	@IsOptional() @Type(() => Number) @IsInt() @Min(1) @Max(100)
 	limit: number = 20;
 
-	// Matches designation or inventory code
+	// Correspond à la désignation ou au code inventaire
 	@IsOptional() @IsString()
 	search?: string;
 

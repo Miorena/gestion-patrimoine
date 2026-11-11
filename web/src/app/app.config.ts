@@ -13,6 +13,6 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(withInterceptors([authInterceptor])),
-    { provide: LOCALE_ID, useValue: 'fr' }, // French dates and numbers
+    { provide: LOCALE_ID, useValue: 'fr' }, // dates et nombres au format français
   ],
 };

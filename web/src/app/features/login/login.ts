@@ -25,7 +25,7 @@ export class Login {
 	protected readonly showPassword = signal(false);
 
 	constructor() {
-		// Already logged in: go straight to the app
+		// Déjà connecté : on va directement à l'application
 		if (this.auth.isLoggedIn()) this.router.navigate(['/assets']);
 	}
 

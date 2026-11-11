@@ -4,7 +4,7 @@ import { catchError, throwError } from 'rxjs';
 import { API_URL } from '../http/api-url';
 import { AuthService } from './auth.service';
 
-// Adds the token to API calls and logs out when it is rejected (expired token)
+// Ajoute le jeton aux appels de l'API et déconnecte l'utilisateur s'il est rejeté (jeton expiré)
 export const authInterceptor: HttpInterceptorFn = (request, next) => {
 	const auth = inject(AuthService);
 	const token = auth.token;

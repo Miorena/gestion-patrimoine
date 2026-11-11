@@ -4,8 +4,8 @@ import { Lookups } from '../models/lookup.model';
 
 export interface HistoryChange {
 	label: string;
-	from: string | null; // null: no "before" value to show (the arrow is hidden)
-	fromEmpty: boolean; // the old value was empty: shown as "vide" in italics, not struck through
+	from: string | null; // null : aucune valeur « avant » à afficher (la flèche est masquée)
+	fromEmpty: boolean; // l'ancienne valeur était vide : affichée « vide » en italique, sans être barrée
 	to: string;
 	toEmpty: boolean;
 }
@@ -16,8 +16,8 @@ export interface HistoryView {
 	action: string;
 	actionLabel: string;
 	userName: string;
-	changes: HistoryChange[]; // readable list of modified fields
-	text: string | null; // plain text when there is nothing to list (e.g. "Code PAT-2026-00003")
+	changes: HistoryChange[]; // liste lisible des champs modifiés
+	text: string | null; // texte simple quand il n'y a rien à lister (ex. « Code PAT-2026-00003 »)
 }
 
 const FIELD_LABELS: Record<string, string> = {
@@ -36,7 +36,7 @@ const FIELD_LABELS: Record<string, string> = {
 
 const NUMBER_FORMAT = new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-// Turns the raw value stored in the history into text a user can read
+// Transforme la valeur brute stockée dans l'historique en texte lisible par l'utilisateur
 const EMPTY_TEXT = 'vide';
 
 function isEmpty(value: unknown): boolean {
@@ -83,7 +83,7 @@ function parseChanges(details: string | null, lookups: Lookups | null): HistoryC
 				},
 		);
 	} catch {
-		return []; // not JSON: shown as plain text
+		return []; // pas du JSON : affiché en texte simple
 	}
 }
 

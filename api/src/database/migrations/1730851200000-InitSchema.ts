@@ -2,7 +2,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-// Runs the SQL script v2 as is (tables, constraints, triggers, initial data)
+// Exécute tel quel le script SQL v2 (tables, contraintes, triggers, données initiales)
 export class InitSchema1730851200000 implements MigrationInterface {
   name = 'InitSchema1730851200000';
 

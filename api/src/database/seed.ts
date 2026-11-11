@@ -1,8 +1,8 @@
 import * as bcrypt from 'bcryptjs';
 import dataSource from './data-source';
 
-// Creates a user and a default location if none exists.
-// Usage: SEED_EMAIL=... SEED_PASSWORD=... [SEED_NAME=...] [SEED_ROLE=Administrateur] npm run seed
+// Crée un utilisateur et un emplacement par défaut s'il n'en existe aucun.
+// Utilisation : SEED_EMAIL=... SEED_PASSWORD=... [SEED_NAME=...] [SEED_ROLE=Administrateur] npm run seed
 async function seed() {
   const email = process.env.SEED_EMAIL?.trim().toLowerCase();
   const password = process.env.SEED_PASSWORD;
@@ -24,7 +24,7 @@ async function seed() {
       [name, email, passwordHash, roles[0].id_role],
     );
 
-    // An asset needs a location: create one until the locations CRUD exists
+    // Un bien a besoin d'un emplacement : on en crée un en attendant le CRUD des emplacements
     const [{ count }] = await dataSource.query('SELECT COUNT(*)::int AS count FROM localisation');
     if (count === 0) {
       await dataSource.query(`INSERT INTO localisation (nom, type) VALUES ('Siège (site principal)', 'site')`);

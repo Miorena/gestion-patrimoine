@@ -12,7 +12,7 @@ import { AuthService } from './auth.service';
   imports: [
     UsersModule,
     JwtModule.registerAsync({
-      global: true, // JwtService is available to the global guard
+      global: true, // JwtService est disponible pour le guard global
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         secret: config.getOrThrow<string>('JWT_SECRET'),
@@ -23,7 +23,7 @@ import { AuthService } from './auth.service';
   controllers: [AuthController],
   providers: [
     AuthService,
-    // Order matters: authenticate first, then check the role
+    // L'ordre compte : d'abord authentifier, puis vérifier le rôle
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
   ],

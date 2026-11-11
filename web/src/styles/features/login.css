@@ -1,4 +1,4 @@
-/* ---------- Login ---------- */
+/* ---------- Connexion ---------- */
 .login-wrapper {
   min-height: calc(100dvh - 2.5rem);
   display: grid;
@@ -15,7 +15,7 @@
 .login-card p {
   margin: 0 0 1.5rem;
 }
-/* Password field with a show / hide button */
+/* Champ de mot de passe avec un bouton afficher / masquer */
 .password-wrap {
   position: relative;
 }
@@ -48,7 +48,7 @@
 .toggle-password:focus-visible {
   outline: 2px solid var(--focus);
 }
-/* Edge adds its own "reveal" icon: hidden to avoid a duplicate */
+/* Edge ajoute sa propre icône « afficher » : masquée pour éviter le doublon */
 input[type='password']::-ms-reveal {
   display: none;
 }

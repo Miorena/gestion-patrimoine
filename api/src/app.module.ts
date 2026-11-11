@@ -15,12 +15,12 @@ import { UsersModule } from './users/users.module';
         type: 'postgres' as const,
         url: config.getOrThrow<string>('DATABASE_URL'),
         autoLoadEntities: true,
-        synchronize: false, // the schema is managed by migrations only
+        synchronize: false, // le schéma est géré uniquement par les migrations
         poolSize: 10,
-        // pg closes idle connections after 10 s by default: with a remote database every
-        // reconnection (TCP + TLS + auth) costs several round trips, so keep them open longer.
+        // pg ferme par défaut les connexions inactives après 10 s : avec une base distante, chaque
+        // reconnexion (TCP + TLS + authentification) coûte plusieurs allers-retours, donc on les garde ouvertes plus longtemps.
         extra: { idleTimeoutMillis: 300_000, connectionTimeoutMillis: 20_000, keepAlive: true },
-        // Logs any query slower than 300 ms: shows what is slow if the problem comes back
+        // Journalise toute requête plus lente que 300 ms : montre ce qui est lent si le problème revient
         maxQueryExecutionTime: 300,
       }),
     }),

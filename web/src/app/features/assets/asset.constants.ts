@@ -1,9 +1,9 @@
 import { AcquisitionMode, RealEstateKind } from './models/asset.model';
 
-// Same label as the API rule RG04
+// Même libellé que la règle RG04 de l'API
 export const IN_SERVICE_LABEL = 'En service';
 
-// French labels shown in the UI
+// Libellés français affichés dans l'interface
 export const ACQUISITION_MODES: { value: AcquisitionMode; label: string }[] = [
 	{ value: 'achat', label: 'Achat' },
 	{ value: 'don_legs', label: 'Don / legs' },

@@ -28,7 +28,7 @@ export class AuthService {
 				try {
 					localStorage.setItem(TOKEN_KEY, response.accessToken);
 					localStorage.setItem(USER_KEY, JSON.stringify(response.user));
-				} catch { /* storage unavailable: the session lasts until reload */ }
+				} catch { /* stockage indisponible : la session dure jusqu'au rechargement */ }
 				this.user.set(response.user);
 			}),
 		);
@@ -38,7 +38,7 @@ export class AuthService {
 		try {
 			localStorage.removeItem(TOKEN_KEY);
 			localStorage.removeItem(USER_KEY);
-		} catch { /* ignore */ }
+		} catch { /* ignorer */ }
 		this.user.set(null);
 		this.router.navigate(['/login']);
 	}
