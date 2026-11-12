@@ -62,7 +62,7 @@ suivi de l'état, validation de l'acquisition et historique de chaque modificati
 
 - Notifications (toasts) après chaque action : connexion, déconnexion, ajout, modification, validation.
 - Confirmation avant la déconnexion.
-- Mot de passe affichable à la connexion.
+- Mot de passe affichable à la connexion et à la création d'un utilisateur.
 - L'écran tient dans la fenêtre : le nombre de biens par page s'adapte à la hauteur disponible.
 - Affichage empilé (liste au-dessus du détail) sur les écrans de moins de 1000 px.
 
@@ -83,6 +83,7 @@ gestion-patrimoine/
 ├── api/                          API NestJS
 │   ├── src/
 │   │   ├── main.ts · app.module.ts
+│   │   ├── organization/         directions, services, agents (entities/, dto/)
 │   │   ├── auth/                 connexion et JWT
 │   │   │   ├── decorators/       @Public, @Roles, @CurrentUser
 │   │   │   ├── guards/           garde JWT (globale) et garde des rôles
@@ -107,6 +108,8 @@ gestion-patrimoine/
 │   │       │   └── toast/        notifications
 │   │       ├── shared/           éléments génériques sans logique métier (pagination)
 │   │       └── features/
+│   │           ├── history/      historique global (recherche, filtre, tri)
+│   │           ├── settings/     paramètres : onglets utilisateurs et organisation
 │   │           ├── login/
 │   │           └── assets/       service, models/, utils/, constantes,
 │   │                             asset-list/ et asset-panel/ (liste + panneau de détail)
@@ -268,7 +271,11 @@ PostgreSQL 18 (même version que Neon). Le schéma est créé par la migration `
 | `historique`                                             | Journal des actions sur les biens                                                                |
 | `utilisateur`, `role`                                    | Comptes et rôles                                                                                 |
 | `compteur_code`                                          | Compteur par année qui produit les codes `PAT-AAAA-NNNNN`                                        |
-| `affectation`, `sortie`, `direction`, `service`, `agent` | Prévues pour la suite (non utilisées par l'interface)                                            |
+| `direction`, `service`, `agent`                          | Organisation, gérée dans Paramètres                                                              |
+| `affectation`, `sortie`                                  | Prévues pour la suite (non utilisées par l'interface)                                            |
+
+La migration `AddRoles` ajoute les rôles Consultant, Chef de service et Auditeur / Comptable.
+Avec Docker elle s'exécute au démarrage de l'API ; en développement : `npm run migration:run` dans `api`.
 
 **Catégories** : Mobilier, Informatique & Télécom, Véhicules, Équipements techniques, Immobilier, Autres (la famille _immobilier_ concerne seulement la catégorie Immobilier).
 **États** : En stock, En service, En maintenance, et trois états finaux : Cédé, Réformé, Perdu.
@@ -306,11 +313,15 @@ La sauvegarde contient aussi les comptes (mots de passe hachés) : ne pas la com
 
 ## 7. Rôles et droits
 
-| Action                                   | Administrateur | Gestionnaire | Responsable |
-| ---------------------------------------- | -------------- | ------------ | ----------- |
-| Voir la liste, le détail et l'historique | oui            | oui          | oui         |
-| Créer et modifier un bien                | oui            | oui          | non         |
-| Valider l'acquisition (RG04)             | oui            | non          | oui         |
+| Action                                          | Administrateur | Gestionnaire | Responsable | Chef de service | Consultant | Auditeur / Comptable |
+| ----------------------------------------------- | -------------- | ------------ | ----------- | --------------- | ---------- | -------------------- |
+| Voir biens, détail, historique, historique global | oui          | oui          | oui         | oui             | oui        | oui                  |
+| Créer et modifier un bien                       | oui            | oui          | non         | non             | non        | non                  |
+| Valider l'acquisition (RG04)                    | oui            | non          | oui         | non             | non        | non                  |
+| Paramètres (utilisateurs, organisation)         | oui            | non          | non         | non             | non        | non                  |
+
+Consultant et Auditeur / Comptable sont en lecture seule. Le Chef de service l'est aussi pour l'instant :
+ses droits sur les affectations et les sorties seront précisés avec ces fonctionnalités.
 
 Les boutons de l'interface (Nouveau, Modifier, Valider l'acquisition) n'apparaissent que pour les rôles autorisés,
 et l'API refuse de toute façon les actions non permises (erreur 403).
@@ -354,7 +365,16 @@ Préfixe `/api`. Toutes les routes sont protégées par un jeton JWT (en-tête `
 | POST    | `/assets`                                      | Administrateur, Gestionnaire | Créer un bien                      |
 | PATCH   | `/assets/:id`                                  | Administrateur, Gestionnaire | Modifier un bien                   |
 | POST    | `/assets/:id/validate-acquisition`             | Administrateur, Responsable  | Valider l'acquisition              |
+| GET     | `/assets/history?page&limit&search&action&sort&order` | tous                  | Historique de tous les biens      |
+| GET     | `/users`                                       | Administrateur               | Liste des utilisateurs             |
+| GET     | `/users/roles`                                 | Administrateur               | Rôles disponibles                  |
+| POST    | `/users`                                       | Administrateur               | Créer un utilisateur               |
+| PATCH   | `/users/:id`                                   | Administrateur               | Changer le rôle ou le mot de passe |
+| GET     | `/organization`                                | tous                         | Arbre directions → services → agents |
+| POST    | `/organization/directions`, `/services`, `/agents` | Administrateur           | Ajouter                            |
+| DELETE  | `/organization/directions/:id`, `/services/:id`, `/agents/:id` | Administrateur | Supprimer (refusé si utilisé)  |
 
+/assets/history est déclarée avant /assets/:id, sinon history serait lu comme un identifiant.
 Les données reçues sont validées strictement : les champs inconnus sont refusés.
 
 ---
@@ -412,7 +432,9 @@ Messages de commit : `feat` (fonctionnalité), `fix` (correction), `perf`, `docs
 ## 13. Limites actuelles et suite prévue
 
 - **Processus de sortie** : la table `sortie` existe, mais il n'y a pas encore d'écran ni de route pour céder, réformer ou déclarer un bien perdu. Les états finaux ne sont donc pas atteignables depuis l'interface.
-- **Affectations** : les tables `affectation`, `direction`, `service` et `agent` sont prêtes, sans écran.
+- **Affectations** : les tables existent et l'organisation (directions, services, agents) se gère dans Paramètres,
+  mais il n'y a pas encore d'écran pour affecter, transférer ou retourner un bien.
+- **Droits à préciser** : Chef de service, Consultant et Auditeur / Comptable n'ont pour l'instant que la lecture.
 - **Localisations** : pas de gestion dans l'interface ; on les ajoute en SQL (`INSERT INTO localisation (nom, type, id_parent) ...`). Le cache de l'API reconnaît une nouvelle localisation immédiatement.
 - **HTTPS** : non configuré (usage en réseau local).
 - **Tests automatisés** : pas encore écrits.
