@@ -1,7 +1,7 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ObjectLiteral, QueryFailedError, Repository } from 'typeorm';
-import { CreateAgentDto, CreateDirectionDto, CreateServiceDto } from './dto/organization.dto';
+import { CreateAgentDto, CreateDirectionDto, CreateServiceDto, RenameDto, UpdateAgentDto } from './dto/organization.dto';
 import { Agent } from './entities/agent.entity';
 import { Direction } from './entities/direction.entity';
 import { Service } from './entities/service.entity';
@@ -69,6 +69,39 @@ export class OrganizationService {
 		);
 	}
 
+	// ---------- Modification ----------
+
+	async renameDirection(id: number, dto: RenameDto) {
+		const direction = await this.directions.findOneBy({ id });
+		if (!direction) throw new NotFoundException(`Direction ${id} introuvable`);
+		direction.name = dto.name;
+		return this.saveUnique(() => this.directions.save(direction), 'Une direction portant ce nom existe déjà.');
+	}
+
+	async renameService(id: number, dto: RenameDto) {
+		const service = await this.services.findOneBy({ id });
+		if (!service) throw new NotFoundException(`Service ${id} introuvable`);
+		service.name = dto.name;
+		return this.saveUnique(() => this.services.save(service), 'Cette direction possède déjà un service portant ce nom.');
+	}
+
+	// Seuls les champs fournis changent ; serviceId déplace l'agent vers un autre service
+	async updateAgent(id: number, dto: UpdateAgentDto) {
+		const agent = await this.agents.findOneBy({ id });
+		if (!agent) throw new NotFoundException(`Agent ${id} introuvable`);
+
+		if (dto.serviceId !== undefined && dto.serviceId !== agent.serviceId) {
+			if (!(await this.services.existsBy({ id: dto.serviceId }))) {
+				throw new NotFoundException(`Service ${dto.serviceId} introuvable`);
+			}
+			agent.serviceId = dto.serviceId;
+		}
+		if (dto.lastName !== undefined) agent.lastName = dto.lastName;
+		if (dto.firstName !== undefined) agent.firstName = dto.firstName;
+		if (dto.position !== undefined) agent.position = dto.position || null;
+		return this.agents.save(agent);
+	}
+
 	// ---------- Suppression ----------
 	// La base refuse (RESTRICT) de supprimer un élément encore utilisé : on le traduit en message clair.
 
@@ -113,6 +146,16 @@ export class OrganizationService {
 			await repository.remove(entity);
 		} catch (error) {
 			if (this.isViolation(error, FOREIGN_KEY_VIOLATION)) throw new ConflictException(inUseMessage);
+			throw error;
+		}
+	}
+
+	// Enregistre et traduit une violation d'unicité (doublon de nom) en message clair
+	private async saveUnique<T>(save: () => Promise<T>, conflictMessage: string) {
+		try {
+			return await save();
+		} catch (error) {
+			if (this.isViolation(error, UNIQUE_VIOLATION)) throw new ConflictException(conflictMessage);
 			throw error;
 		}
 	}

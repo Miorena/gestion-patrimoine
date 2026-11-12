@@ -25,6 +25,19 @@ export class OrganizationService {
 		return this.http.post<Agent>(`${this.url}/agents`, payload);
 	}
 
+	renameDirection(id: number, name: string) {
+		return this.http.patch<Direction>(`${this.url}/directions/${id}`, { name });
+	}
+
+	renameService(id: number, name: string) {
+		return this.http.patch<OrgService>(`${this.url}/services/${id}`, { name });
+	}
+
+	// Modifie un agent ; avec un autre serviceId, l'agent est déplacé vers ce service
+	updateAgent(id: number, payload: AgentPayload) {
+		return this.http.patch<Agent>(`${this.url}/agents/${id}`, payload);
+	}
+
 	removeDirection(id: number) {
 		return this.http.delete<void>(`${this.url}/directions/${id}`);
 	}

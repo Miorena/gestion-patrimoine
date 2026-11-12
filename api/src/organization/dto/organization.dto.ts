@@ -30,3 +30,25 @@ export class CreateAgentDto {
 	@Type(() => Number) @IsInt()
 	serviceId: number;
 }
+
+// Renommer une direction ou un service
+export class RenameDto {
+	@Transform(trim) @IsString() @IsNotEmpty() @MaxLength(150)
+	name: string;
+}
+
+// Modifier un agent : seuls les champs fournis changent (serviceId déplace l'agent vers un autre service)
+export class UpdateAgentDto {
+	@IsOptional() @Transform(trim) @IsString() @IsNotEmpty() @MaxLength(100)
+	lastName?: string;
+
+	@IsOptional() @Transform(trim) @IsString() @IsNotEmpty() @MaxLength(100)
+	firstName?: string;
+
+	// Une chaîne vide efface la fonction
+	@IsOptional() @Transform(trim) @IsString() @MaxLength(150)
+	position?: string;
+
+	@IsOptional() @Type(() => Number) @IsInt()
+	serviceId?: number;
+}

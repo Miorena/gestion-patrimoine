@@ -55,7 +55,8 @@ suivi de l'état, validation de l'acquisition et historique de chaque modificati
 
 - **Utilisateurs** : liste, création (nom, e-mail, mot de passe, rôle) et changement de rôle.
   Un administrateur ne peut pas modifier son propre rôle.
-- **Organisation** : ajout et suppression de directions, services et agents, présentés en arbre.
+- **Organisation** : ajout, renommage et suppression de directions et de services, ajout, modification (y compris le déplacement vers un autre service) et suppression d'agents.
+  Deux colonnes : à gauche une carte par direction avec ses services et la recherche, à droite le service choisi et ses agents.
   La suppression est refusée si l'élément est encore utilisé.
 
 **Confort d'utilisation**
@@ -372,6 +373,8 @@ Préfixe `/api`. Toutes les routes sont protégées par un jeton JWT (en-tête `
 | PATCH   | `/users/:id`                                   | Administrateur               | Changer le rôle ou le mot de passe |
 | GET     | `/organization`                                | tous                         | Arbre directions → services → agents |
 | POST    | `/organization/directions`, `/services`, `/agents` | Administrateur           | Ajouter                            |
+| PATCH   | `/organization/directions/:id`, `/services/:id` | Administrateur           | Renommer (refusé si le nom existe déjà) |
+| PATCH   | `/organization/agents/:id`                     | Administrateur               | Modifier un agent ou le déplacer (`serviceId`) |
 | DELETE  | `/organization/directions/:id`, `/services/:id`, `/agents/:id` | Administrateur | Supprimer (refusé si utilisé)  |
 
 /assets/history est déclarée avant /assets/:id, sinon history serait lu comme un identifiant.

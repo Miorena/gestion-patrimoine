@@ -1,7 +1,7 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, ParseIntPipe, Patch, Post } from '@nestjs/common';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { RoleName } from '../users/enums/role-name.enum';
-import { CreateAgentDto, CreateDirectionDto, CreateServiceDto } from './dto/organization.dto';
+import { CreateAgentDto, CreateDirectionDto, CreateServiceDto, RenameDto, UpdateAgentDto } from './dto/organization.dto';
 import { OrganizationService } from './organization.service';
 
 @Controller('organization')
@@ -14,11 +14,17 @@ export class OrganizationController {
 		return this.organizationService.findAll();
 	}
 
-	// L'ajout et la suppression sont réservés à l'administrateur
+	// L'ajout, la modification et la suppression sont réservés à l'administrateur
 	@Roles(RoleName.ADMINISTRATOR)
 	@Post('directions')
 	createDirection(@Body() dto: CreateDirectionDto) {
 		return this.organizationService.createDirection(dto);
+	}
+
+	@Roles(RoleName.ADMINISTRATOR)
+	@Patch('directions/:id')
+	renameDirection(@Param('id', ParseIntPipe) id: number, @Body() dto: RenameDto) {
+		return this.organizationService.renameDirection(id, dto);
 	}
 
 	@Roles(RoleName.ADMINISTRATOR)
@@ -35,6 +41,12 @@ export class OrganizationController {
 	}
 
 	@Roles(RoleName.ADMINISTRATOR)
+	@Patch('services/:id')
+	renameService(@Param('id', ParseIntPipe) id: number, @Body() dto: RenameDto) {
+		return this.organizationService.renameService(id, dto);
+	}
+
+	@Roles(RoleName.ADMINISTRATOR)
 	@Delete('services/:id')
 	@HttpCode(204)
 	removeService(@Param('id', ParseIntPipe) id: number) {
@@ -45,6 +57,12 @@ export class OrganizationController {
 	@Post('agents')
 	createAgent(@Body() dto: CreateAgentDto) {
 		return this.organizationService.createAgent(dto);
+	}
+
+	@Roles(RoleName.ADMINISTRATOR)
+	@Patch('agents/:id')
+	updateAgent(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateAgentDto) {
+		return this.organizationService.updateAgent(id, dto);
 	}
 
 	@Roles(RoleName.ADMINISTRATOR)

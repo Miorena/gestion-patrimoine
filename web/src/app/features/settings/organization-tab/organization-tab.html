@@ -1,196 +1,505 @@
-<div class="tab-toolbar">
-  <p class="muted">{{ directions().length }} direction(s)</p>
-  @if (adding() !== 'direction') {
-    <button type="button" class="btn btn-primary" (click)="startAdding('direction')">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
-        <path d="M12 5v14M5 12h14" />
-      </svg>
-      Nouvelle direction
-    </button>
-  }
-</div>
-
 @if (error(); as message) {
   <div class="alert alert-error" role="alert">{{ message }}</div>
 }
 
-@if (adding() === 'direction') {
-  <form class="inline-card" (ngSubmit)="addDirection()">
-    <h2>Nouvelle direction</h2>
-    <div class="field">
-      <label for="direction-name">Nom <span class="req">*</span></label>
-      <input id="direction-name" [formControl]="name" maxlength="150" autocomplete="off" />
-      @if (name.touched && name.invalid) {
-        <small class="error">Le nom est obligatoire.</small>
-      }
-    </div>
-    <div class="inline-actions">
-      <button type="button" class="btn" [disabled]="busy()" (click)="cancelAdding()">Annuler</button>
-      <button type="submit" class="btn btn-primary" [disabled]="busy()">Ajouter</button>
-    </div>
-  </form>
-}
+<div class="org-layout">
+  <!-- ===== Colonne de gauche : la structure (directions et leurs services) ===== -->
+  <aside class="org-side" aria-label="Structure de l'organisation">
+    <h2>Organisation</h2>
+    <p class="muted org-summary">{{ summary() }}</p>
 
-<ul class="org-tree">
-  @for (direction of directions(); track direction.id) {
-    <li class="org-node">
-      <div class="org-row org-direction">
-        <button
-          type="button"
-          class="org-toggle"
-          [attr.aria-expanded]="openDirections().has(direction.id)"
-          (click)="toggleDirection(direction.id)"
-        >
-          <span class="org-caret" [class.open]="openDirections().has(direction.id)" aria-hidden="true">›</span>
-          <strong>{{ direction.name }}</strong>
-          <span class="muted org-count">{{ direction.services.length }} service(s)</span>
-        </button>
-        <div class="org-actions">
-          <button type="button" class="btn btn-sm" (click)="startAdding('service-' + direction.id)">+ Service</button>
-          <button
-            type="button"
-            class="icon-btn danger"
-            [attr.aria-label]="'Supprimer la direction ' + direction.name"
-            title="Supprimer"
-            (click)="askDelete('direction', direction.id, direction.name)"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-              <path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v5M14 11v5" />
-            </svg>
+    @if (addingDirection()) {
+      <form class="org-add-form" (ngSubmit)="addDirection()">
+        <label for="direction-name">Nom de la nouvelle direction <span class="req">*</span></label>
+        <input
+          id="direction-name"
+          [formControl]="directionName"
+          maxlength="150"
+          autocomplete="off"
+        />
+        @if (directionName.touched && directionName.invalid) {
+          <small class="error">Le nom est obligatoire.</small>
+        }
+        <div class="org-form-actions">
+          <button type="button" class="btn" [disabled]="busy()" (click)="cancelAdding()">
+            Annuler
           </button>
+          <button type="submit" class="btn btn-primary" [disabled]="busy()">Ajouter</button>
         </div>
-      </div>
+      </form>
+    } @else {
+      <button type="button" class="btn btn-primary btn-block" (click)="startAddDirection()">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.2"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <path d="M12 5v14M5 12h14" />
+        </svg>
+        Nouvelle direction
+      </button>
+    }
 
-      @if (adding() === 'service-' + direction.id) {
-        <form class="inline-card nested" (ngSubmit)="addService(direction)">
-          <div class="field">
-            <label [attr.for]="'service-name-' + direction.id">Nouveau service dans « {{ direction.name }} » <span class="req">*</span></label>
-            <input [id]="'service-name-' + direction.id" [formControl]="name" maxlength="150" autocomplete="off" />
-            @if (name.touched && name.invalid) {
-              <small class="error">Le nom est obligatoire.</small>
-            }
-          </div>
-          <div class="inline-actions">
-            <button type="button" class="btn" [disabled]="busy()" (click)="cancelAdding()">Annuler</button>
-            <button type="submit" class="btn btn-primary" [disabled]="busy()">Ajouter</button>
-          </div>
-        </form>
-      }
+    <input
+      type="search"
+      class="org-search"
+      placeholder="Rechercher un service ou un agent…"
+      aria-label="Rechercher un service ou un agent"
+      [value]="query()"
+      (input)="onQuery($event)"
+    />
 
-      @if (openDirections().has(direction.id)) {
-        <ul class="org-children">
+    @for (direction of visibleDirections(); track direction.id) {
+      <section class="org-group">
+        <header class="org-group-head">
+          <div class="org-group-title">
+            <h3>{{ direction.name }}</h3>
+            <span class="muted">{{ direction.services.length }} service(s)</span>
+          </div>
+          <div class="org-group-actions">
+            <button
+              type="button"
+              class="icon-btn"
+              [attr.aria-label]="'Renommer la direction ' + direction.name"
+              title="Renommer"
+              (click)="startRename('direction', direction.id, direction.name)"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              class="icon-btn danger"
+              [attr.aria-label]="'Supprimer la direction ' + direction.name"
+              title="Supprimer"
+              (click)="askDelete('direction', direction.id, direction.name)"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v5M14 11v5" />
+              </svg>
+            </button>
+          </div>
+        </header>
+
+        <ul class="org-services">
           @for (service of direction.services; track service.id) {
-            <li class="org-node">
-              <div class="org-row">
-                <button
-                  type="button"
-                  class="org-toggle"
-                  [attr.aria-expanded]="openServices().has(service.id)"
-                  (click)="toggleService(service.id)"
-                >
-                  <span class="org-caret" [class.open]="openServices().has(service.id)" aria-hidden="true">›</span>
-                  {{ service.name }}
-                  <span class="muted org-count">{{ service.agents.length }} agent(s)</span>
-                </button>
-                <div class="org-actions">
-                  <button type="button" class="btn btn-sm" (click)="startAdding('agent-' + service.id)">+ Agent</button>
-                  <button
-                    type="button"
-                    class="icon-btn danger"
-                    [attr.aria-label]="'Supprimer le service ' + service.name"
-                    title="Supprimer"
-                    (click)="askDelete('service', service.id, service.name)"
-                  >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                      <path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v5M14 11v5" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-
-              @if (adding() === 'agent-' + service.id) {
-                <form class="inline-card nested" (ngSubmit)="addAgent(service)">
-                  <div class="inline-grid">
-                    <div class="field">
-                      <label [attr.for]="'agent-last-' + service.id">Nom <span class="req">*</span></label>
-                      <input [id]="'agent-last-' + service.id" [formControl]="lastName" maxlength="100" autocomplete="off" />
-                      @if (lastName.touched && lastName.invalid) {
-                        <small class="error">Le nom est obligatoire.</small>
-                      }
-                    </div>
-                    <div class="field">
-                      <label [attr.for]="'agent-first-' + service.id">Prénom <span class="req">*</span></label>
-                      <input [id]="'agent-first-' + service.id" [formControl]="firstName" maxlength="100" autocomplete="off" />
-                      @if (firstName.touched && firstName.invalid) {
-                        <small class="error">Le prénom est obligatoire.</small>
-                      }
-                    </div>
-                    <div class="field">
-                      <label [attr.for]="'agent-position-' + service.id">Fonction</label>
-                      <input [id]="'agent-position-' + service.id" [formControl]="position" maxlength="150" autocomplete="off" />
-                    </div>
-                  </div>
-                  <div class="inline-actions">
-                    <button type="button" class="btn" [disabled]="busy()" (click)="cancelAdding()">Annuler</button>
-                    <button type="submit" class="btn btn-primary" [disabled]="busy()">Ajouter</button>
-                  </div>
-                </form>
-              }
-
-              @if (openServices().has(service.id)) {
-                <ul class="org-children">
-                  @for (agent of service.agents; track agent.id) {
-                    <li class="org-row org-agent">
-                      <span>
-                        {{ agentName(agent) }}
-                        @if (agent.position) {
-                          <span class="muted"> · {{ agent.position }}</span>
-                        }
-                      </span>
-                      <button
-                        type="button"
-                        class="icon-btn danger"
-                        [attr.aria-label]="'Supprimer l’agent ' + agentName(agent)"
-                        title="Supprimer"
-                        (click)="askDelete('agent', agent.id, agentName(agent))"
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                          <path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v5M14 11v5" />
-                        </svg>
-                      </button>
-                    </li>
-                  } @empty {
-                    <li class="org-empty">Aucun agent dans ce service.</li>
-                  }
-                </ul>
-              }
+            <li>
+              <button
+                type="button"
+                class="org-service"
+                [class.active]="service.id === selectedId()"
+                [attr.aria-current]="service.id === selectedId() ? 'true' : null"
+                (click)="select(service.id)"
+              >
+                <span>{{ service.name }}</span>
+                <span class="org-pill">{{ service.agents.length }}</span>
+              </button>
             </li>
           } @empty {
             <li class="org-empty">Aucun service dans cette direction.</li>
           }
         </ul>
-      }
-    </li>
-  } @empty {
-    <li class="empty">{{ loading() ? 'Chargement…' : 'Aucune direction. Ajoutez-en une pour commencer.' }}</li>
-  }
-</ul>
 
-<!-- Confirmation de suppression -->
+        <div class="org-group-foot">
+          @if (addingServiceIn() === direction.id) {
+            <form class="org-add-form" (ngSubmit)="addService(direction)">
+              <label [attr.for]="'service-name-' + direction.id"
+                >Nom du nouveau service <span class="req">*</span></label
+              >
+              <input
+                [id]="'service-name-' + direction.id"
+                [formControl]="serviceName"
+                maxlength="150"
+                autocomplete="off"
+              />
+              @if (serviceName.touched && serviceName.invalid) {
+                <small class="error">Le nom est obligatoire.</small>
+              }
+              <div class="org-form-actions">
+                <button type="button" class="btn" [disabled]="busy()" (click)="cancelAdding()">
+                  Annuler
+                </button>
+                <button type="submit" class="btn btn-primary" [disabled]="busy()">Ajouter</button>
+              </div>
+            </form>
+          } @else {
+            <button type="button" class="org-add" (click)="startAddService(direction)">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                stroke-linecap="round"
+                aria-hidden="true"
+              >
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              Ajouter un service
+            </button>
+          }
+        </div>
+      </section>
+    } @empty {
+      <p class="empty">
+        {{
+          loading()
+            ? 'Chargement…'
+            : query()
+              ? 'Aucun résultat.'
+              : 'Aucune direction. Ajoutez-en une pour commencer.'
+        }}
+      </p>
+    }
+  </aside>
+
+  <!-- ===== Colonne de droite : le service choisi et ses agents ===== -->
+  <section class="org-main">
+    @if (selected(); as current) {
+      <header class="org-main-head">
+        <div>
+          <div class="muted org-crumb">{{ current.direction.name }}</div>
+          <h2>{{ current.service.name }}</h2>
+          <p class="muted">{{ current.service.agents.length }} agent(s)</p>
+        </div>
+        <div class="org-main-actions">
+          <div class="org-btn-row">
+            <button
+              type="button"
+              class="btn"
+              (click)="startRename('service', current.service.id, current.service.name)"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+              </svg>
+              Renommer
+            </button>
+            <button
+              type="button"
+              class="btn btn-danger-outline"
+              [disabled]="current.service.agents.length > 0"
+              (click)="askDelete('service', current.service.id, current.service.name)"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v5M14 11v5" />
+              </svg>
+              Supprimer
+            </button>
+          </div>
+          @if (current.service.agents.length > 0) {
+            <p class="muted org-hint">
+              Suppression impossible : ce service compte encore
+              {{ current.service.agents.length }} agent(s).
+            </p>
+          }
+        </div>
+      </header>
+
+      <div class="org-agents">
+        <div class="org-agents-bar">
+          <h3>Agents du service</h3>
+          <div class="org-agents-tools">
+            <input
+              type="search"
+              class="org-search"
+              placeholder="Rechercher un agent…"
+              aria-label="Rechercher un agent"
+              [value]="agentQuery()"
+              (input)="onAgentQuery($event)"
+            />
+            <button type="button" class="btn btn-primary" (click)="openAgentDrawer(null)">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                aria-hidden="true"
+              >
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              Ajouter un agent
+            </button>
+          </div>
+        </div>
+
+        <div class="agent-row agent-row-head" aria-hidden="true">
+          <span>Agent</span>
+          <span>Fonction</span>
+          <span class="agent-actions">Actions</span>
+        </div>
+
+        @for (agent of visibleAgents(); track agent.id) {
+          <div class="agent-row">
+            <div class="agent-id">
+              <span class="avatar" aria-hidden="true">{{ initials(agent) }}</span>
+              <strong>{{ agentName(agent) }}</strong>
+            </div>
+            <span class="agent-position">{{ agent.position || '—' }}</span>
+            <div class="agent-actions">
+              <button type="button" class="btn btn-sm" (click)="openAgentDrawer(agent)">
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                </svg>
+                Modifier
+              </button>
+              <button
+                type="button"
+                class="icon-btn danger"
+                [attr.aria-label]="'Supprimer l’agent ' + agentName(agent)"
+                title="Supprimer"
+                (click)="askDelete('agent', agent.id, agentName(agent))"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                >
+                  <path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 11v5M14 11v5" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        } @empty {
+          <p class="org-empty">
+            {{
+              agentQuery()
+                ? 'Aucun agent ne correspond à la recherche.'
+                : 'Aucun agent dans ce service. Ajoutez-en un.'
+            }}
+          </p>
+        }
+      </div>
+    } @else {
+      <p class="empty">
+        {{ loading() ? 'Chargement…' : 'Ajoutez une direction puis un service pour commencer.' }}
+      </p>
+    }
+  </section>
+</div>
+
+<!-- ===== Panneau latéral : ajouter / modifier un agent ===== -->
+@if (drawer(); as state) {
+  <button
+    type="button"
+    class="drawer-backdrop"
+    aria-label="Fermer le panneau"
+    (click)="closeOverlays()"
+  ></button>
+  <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+    <form [formGroup]="agentForm" (ngSubmit)="saveAgent()" class="drawer-form">
+      <header class="drawer-head">
+        <div>
+          <h2 id="drawer-title">{{ state.agent ? 'Modifier l’agent' : 'Nouvel agent' }}</h2>
+          @if (state.agent; as agent) {
+            <p class="muted">{{ agentName(agent) }}</p>
+          }
+        </div>
+        <button type="button" class="icon-btn" aria-label="Fermer" (click)="closeOverlays()">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            aria-hidden="true"
+          >
+            <path d="M6 6l12 12M18 6 6 18" />
+          </svg>
+        </button>
+      </header>
+
+      <div class="drawer-body">
+        <div class="inline-grid">
+          <div class="field">
+            <label for="agent-last">Nom <span class="req">*</span></label>
+            <input id="agent-last" formControlName="lastName" maxlength="100" autocomplete="off" />
+            @if (agentForm.controls.lastName.touched && agentForm.controls.lastName.invalid) {
+              <small class="error">Le nom est obligatoire.</small>
+            }
+          </div>
+          <div class="field">
+            <label for="agent-first">Prénom <span class="req">*</span></label>
+            <input
+              id="agent-first"
+              formControlName="firstName"
+              maxlength="100"
+              autocomplete="off"
+            />
+            @if (agentForm.controls.firstName.touched && agentForm.controls.firstName.invalid) {
+              <small class="error">Le prénom est obligatoire.</small>
+            }
+          </div>
+        </div>
+        <div class="field">
+          <label for="agent-position">Fonction</label>
+          <input
+            id="agent-position"
+            formControlName="position"
+            maxlength="150"
+            autocomplete="off"
+          />
+        </div>
+        <div class="field">
+          <label for="agent-service">Service <span class="req">*</span></label>
+          <select id="agent-service" formControlName="serviceId">
+            @for (option of serviceOptions(); track option.id) {
+              <option [ngValue]="option.id">{{ option.label }}</option>
+            }
+          </select>
+          @if (state.agent) {
+            <small class="muted">Choisir un autre service déplace l’agent.</small>
+          }
+        </div>
+      </div>
+
+      <footer class="drawer-foot">
+        @if (state.agent; as agent) {
+          <button
+            type="button"
+            class="btn-link-danger"
+            (click)="askDelete('agent', agent.id, agentName(agent))"
+          >
+            Supprimer l’agent
+          </button>
+        } @else {
+          <span></span>
+        }
+        <div class="org-btn-row">
+          <button type="button" class="btn" [disabled]="busy()" (click)="closeOverlays()">
+            Annuler
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="busy()">Enregistrer</button>
+        </div>
+      </footer>
+    </form>
+  </aside>
+}
+
+<!-- ===== Renommer une direction ou un service ===== -->
+@if (renaming(); as target) {
+  <div class="confirm-backdrop" (click)="closeOverlays()"></div>
+  <form
+    class="confirm-box"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="rename-title"
+    (ngSubmit)="confirmRename()"
+  >
+    <h2 id="rename-title">
+      Renommer {{ target.kind === 'direction' ? 'la direction' : 'le service' }}
+    </h2>
+    <div class="field">
+      <label for="rename-name">Nouveau nom <span class="req">*</span></label>
+      <input id="rename-name" [formControl]="renameName" maxlength="150" autocomplete="off" />
+      @if (renameName.touched && renameName.invalid) {
+        <small class="error">Le nom est obligatoire.</small>
+      }
+    </div>
+    <div class="inline-actions">
+      <button type="button" class="btn" [disabled]="busy()" (click)="closeOverlays()">
+        Annuler
+      </button>
+      <button type="submit" class="btn btn-primary" [disabled]="busy()">Enregistrer</button>
+    </div>
+  </form>
+}
+
+<!-- ===== Confirmation de suppression ===== -->
 @if (pendingDelete(); as target) {
-  <div class="confirm-backdrop" (click)="cancelDelete()"></div>
-  <div class="confirm-box" role="alertdialog" aria-labelledby="confirm-title">
+  <div class="confirm-backdrop confirm-top" (click)="pendingDelete.set(null)"></div>
+  <div
+    class="confirm-box confirm-top"
+    role="alertdialog"
+    aria-modal="true"
+    aria-labelledby="confirm-title"
+  >
     <h2 id="confirm-title">Supprimer « {{ target.label }} » ?</h2>
     <p class="muted">
       @switch (target.kind) {
-        @case ('direction') { Une direction ne peut être supprimée que si elle ne contient plus de service. }
-        @case ('service') { Un service ne peut être supprimé que s'il n'a plus d'agent ni de bien affecté. }
-        @default { Un agent ne peut être supprimé que s'il n'a jamais reçu de bien. }
+        @case ('direction') {
+          Une direction ne peut être supprimée que si elle ne contient plus de service.
+        }
+        @case ('service') {
+          Un service ne peut être supprimé que s'il n'a plus d'agent ni de bien affecté.
+        }
+        @default {
+          Un agent ne peut être supprimé que s'il n'a jamais reçu de bien.
+        }
       }
     </p>
     <div class="inline-actions">
-      <button type="button" class="btn" (click)="cancelDelete()">Annuler</button>
-      <button type="button" class="btn btn-danger" [disabled]="busy()" (click)="confirmDelete()">Supprimer</button>
+      <button type="button" class="btn" (click)="pendingDelete.set(null)">Annuler</button>
+      <button type="button" class="btn btn-danger" [disabled]="busy()" (click)="confirmDelete()">
+        Supprimer
+      </button>
     </div>
   </div>
 }
