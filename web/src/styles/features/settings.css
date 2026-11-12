@@ -333,6 +333,64 @@ app-settings-page {
   margin-top: 0;
 }
 
+/* Grand écran : la page ne défile plus, chaque colonne a son propre défilement */
+@media (min-width: 960px) {
+  /* Quand l'onglet Organisation est affiché, le conteneur ne défile plus lui-même */
+  .settings-body:has(app-organization-tab) {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  /* L'onglet remplit toute la hauteur disponible... */
+  app-organization-tab {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+  }
+  /* ...et les deux colonnes prennent cette hauteur côte à côte */
+  .org-layout {
+    flex: 1;
+    min-height: 0;
+    flex-wrap: nowrap;
+    align-items: stretch;
+  }
+  /* Chaque colonne défile indépendamment */
+  /* Colonne de gauche : défile entièrement */
+  .org-side {
+    min-height: 0;
+    overflow-y: auto;
+  }
+  /* Colonne de droite : l'en-tête du service et la barre d'outils restent fixes,
+     seule la liste des agents défile */
+  .org-main {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .org-main-head {
+    flex: none;
+  }
+  .org-agents {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    padding-bottom: 0;
+  }
+  .org-agents-bar,
+  .agent-row-head {
+    flex: none;
+  }
+  .org-agents-list {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-bottom: 1.5rem;
+  }
+}
+
 /* Liste des agents (colonnes à largeur fixe pour rester alignées d'une ligne à l'autre) */
 .agent-row {
   display: grid;
