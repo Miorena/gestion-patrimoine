@@ -45,6 +45,19 @@ suivi de l'état, validation de l'acquisition et historique de chaque modificati
 - Bouton **Nouveau** : formulaire vide. Annuler réaffiche la première ligne de la liste.
 - Bouton **Valider l'acquisition** pour les rôles autorisés.
 
+**Navigation**
+
+- Menu latéral (icône en haut à gauche) : Accueil, Historique, Paramètres, Déconnexion (en rouge, en bas du panneau).
+- **Historique global** (`/history`) : tous les événements de tous les biens dans un seul tableau, avec recherche
+  (bien, code, utilisateur, détails), filtre par type d'action, tri par colonne et pagination.
+
+**Paramètres (administrateur uniquement)**
+
+- **Utilisateurs** : liste, création (nom, e-mail, mot de passe, rôle) et changement de rôle.
+  Un administrateur ne peut pas modifier son propre rôle.
+- **Organisation** : ajout et suppression de directions, services et agents, présentés en arbre.
+  La suppression est refusée si l'élément est encore utilisé.
+
 **Confort d'utilisation**
 
 - Notifications (toasts) après chaque action : connexion, déconnexion, ajout, modification, validation.
